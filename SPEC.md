@@ -50,11 +50,11 @@ https://youtu.be/Jv-yXlqsbJc?si=vGWDmeQ_S8UFJhVQ&t=5
 > - Coloque aqui **três imagens** capturadas do vídeo acima, que você
 >   irá usar como ilustração para as explicações que vêm abaixo.
 
-![alt text](image-5.png)
+![alt text](image1.png)
 
-![alt text](image-3.png)
+![alt text](image2.png)
 
-![alt text](image-4.png)
+![alt text](image3.png)
 
 
 
