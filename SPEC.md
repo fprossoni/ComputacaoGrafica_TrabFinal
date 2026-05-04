@@ -72,6 +72,8 @@ O usuário poderá realizar transformações geométricas de objetos ao segurá-
 1. Câmera em primeira pessoa
 2. Câmera look-at do objetivo
 
+> Comentário Professor: a dinâmica dos objetos "crescerem" de acordo com a orientação da câmera perspectiva é bem legal, e já pode contar como um segundo tipo de "câmera" (assim poderia implementar somente câmera em primeira pessoa).
+
 ### Instâncias de objetos
 Objetos do cenário, como paredes, luminárias, mesas, caixas e outros serão renderizados em múltiplos pontos do cenário com diferentes matrizes.
 
