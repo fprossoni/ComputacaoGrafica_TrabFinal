@@ -253,8 +253,11 @@ int main(int argc, char* argv[])
 
     // Criamos uma janela do sistema operacional, com 800 colunas e 600 linhas
     // de pixels, e com título "INF01047 ...".
+    GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor(); //define monitor primario
+
+    const GLFWvidmode* monitor_res = glfwGetVideoMode(primaryMonitor); //pega resolucao do monitor
     GLFWwindow* window;
-    window = glfwCreateWindow(800, 600, "INF01047 - Seu Cartao - Seu Nome", NULL, NULL);
+    window = glfwCreateWindow(monitor_res->width, monitor_res->height, "INF01047 - 587631 - Felipe Rossoni", NULL, NULL); //monitor_res->witdth comprimento do monitor monitor_res->height altura do monitor
     if (!window)
     {
         glfwTerminate();
@@ -283,7 +286,7 @@ int main(int argc, char* argv[])
     // redimensionada, por consequência alterando o tamanho do "framebuffer"
     // (região de memória onde são armazenados os pixels da imagem).
     glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
-    FramebufferSizeCallback(window, 800, 600); // Forçamos a chamada do callback acima, para definir g_ScreenRatio.
+    FramebufferSizeCallback(window, monitor_res->width, monitor_res->height); // Forçamos a chamada do callback acima, para definir g_ScreenRatio.
 
     // Imprimimos no terminal informações sobre a GPU do sistema
     const GLubyte *vendor      = glGetString(GL_VENDOR);
@@ -301,6 +304,9 @@ int main(int argc, char* argv[])
     // Carregamos duas imagens para serem utilizadas como textura
     LoadTextureImage("../../data/red_brick_diff_1k.jpg");      // TextureImage0
     LoadTextureImage("../../data/rocky_terrain_02_diff_1k.jpg"); // TextureImage1
+    LoadTextureImage("../../data/textures/chess_set_pieces_white_diff_1k.jpg"); // TextureImage2
+    LoadTextureImage("../../data/textures/wood_floor_diff_2k.jpg"); // TextureImage3
+  
 
     // Construímos a representação de objetos geométricos através de malhas de triângulos
     ObjModel spheremodel("../../data/sphere.obj");
@@ -314,6 +320,15 @@ int main(int argc, char* argv[])
     ObjModel planemodel("../../data/plane.obj");
     ComputeNormals(&planemodel);
     BuildTrianglesAndAddToVirtualScene(&planemodel);
+
+    ObjModel chessmodel("../../data/chess_set_1k.obj");
+    ComputeNormals(&chessmodel);
+    BuildTrianglesAndAddToVirtualScene(&chessmodel);
+
+    ObjModel wood_floor("../../data/wood_floor_2k.obj");
+    ComputeNormals(&wood_floor);
+    BuildTrianglesAndAddToVirtualScene(&wood_floor);
+
 
     if ( argc > 1 )
     {
@@ -379,7 +394,7 @@ int main(int argc, char* argv[])
         // Note que, no sistema de coordenadas da câmera, os planos near e far
         // estão no sentido negativo! Veja slides 176-204 do documento Aula_09_Projecoes.pdf.
         float nearplane = -0.1f;  // Posição do "near plane"
-        float farplane  = -10.0f; // Posição do "far plane"
+        float farplane  = -25.0f; // Posição do "far plane"
 
         if (g_UsePerspectiveProjection)
         {
@@ -413,25 +428,26 @@ int main(int argc, char* argv[])
         #define SPHERE 0
         #define BUNNY  1
         #define PLANE  2
+        #define CHESS_WHITE_PIECE 3
+        #define WOOD_FLOOR 4
 
-        // Desenhamos o modelo da esfera
-        model = Matrix_Translate(-1.0f,0.0f,0.0f)
-              * Matrix_Rotate_Z(0.6f)
-              * Matrix_Rotate_X(0.2f)
-              * Matrix_Rotate_Y(g_AngleY + (float)glfwGetTime() * 0.1f);
+        // Desenhamos pecas de xadrez
+        model = Matrix_Translate(0.0f,0.0f,0.0f)
+              * Matrix_Scale(5.0f, 5.0f, 5.0f);
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(g_object_id_uniform, SPHERE);
-        DrawVirtualObject("the_sphere");
+        glUniform1i(g_object_id_uniform, CHESS_WHITE_PIECE);
 
-        // Desenhamos o modelo do coelho
-        model = Matrix_Translate(1.0f,0.0f,0.0f)
-              * Matrix_Rotate_X(g_AngleX + (float)glfwGetTime() * 0.1f);
-        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(g_object_id_uniform, BUNNY);
-        DrawVirtualObject("the_bunny");
+        DrawVirtualObject("piece_pawn_white_01"); //peao
+        DrawVirtualObject("piece_rook_white_01"); //TORRE
+        DrawVirtualObject("piece_bishop_white_01"); //bispo
+        DrawVirtualObject("piece_knight_white_01"); //cavalo
+        DrawVirtualObject("piece_bishop_filler_white_01"); //filler bispo
+        DrawVirtualObject("piece_queen_white"); //dama
+        DrawVirtualObject("piece_king_white"); //rei
 
         // Desenhamos o plano do chão
-        model = Matrix_Translate(0.0f,-1.1f,0.0f);
+        model = Matrix_Translate(0.0f,0.0f,0.0f) 
+                * Matrix_Scale(5.0f, 5.0f, 5.0f);
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, PLANE);
         DrawVirtualObject("the_plane");

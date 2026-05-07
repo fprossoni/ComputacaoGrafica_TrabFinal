@@ -1,0 +1,11 @@
+https://polyhaven.com/a/chess_set
+
+mexer no obj do arquivo para mudar o nome de cada peça.
+ex obj1 = torre
+
+criar o arquivo na renderizacao com o nome desse ex "obj1" na main
+pode colocar as pecas em sequencia, estao mapeadas para ficarem lado a lado no obj
+
+converter do gltf para obj
+
+mapear textura no shader_fragment.glsl com a mesma escala
