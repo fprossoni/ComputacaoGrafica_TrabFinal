@@ -18,6 +18,7 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include <iostream>
 
 // Headers abaixo são específicos de C++
 #include <set>
@@ -195,7 +196,11 @@ bool g_MiddleMouseButtonPressed = false; // Análogo para botão do meio do mous
 // usuário através do mouse (veja função CursorPosCallback()). A posição
 // efetiva da câmera é calculada dentro da função main(), dentro do loop de
 // renderização.
-float g_CameraTheta = 0.0f; // Ângulo no plano ZX em relação ao eixo Z
+
+#define PI 3.141592
+#define PIF 3.141592f
+
+float g_CameraTheta = PIF; // Ângulo no plano ZX em relação ao eixo Z
 float g_CameraPhi = 0.0f;   // Ângulo em relação ao eixo Y
 float g_CameraDistance = 3.5f; // Distância da câmera para a origem
 
@@ -224,6 +229,33 @@ GLint g_bbox_max_uniform;
 
 // Número de texturas carregadas pela função LoadTextureImage()
 GLuint g_NumLoadedTextures = 0;
+
+#define COR_R 0.196f
+#define COR_G 0.471f
+#define COR_B 0.863f
+#define COR_A 0.8f
+
+#define SPEED 0.015f
+
+bool g_W_Pressed = false;
+bool g_A_Pressed = false;
+bool g_S_Pressed = false;
+bool g_D_Pressed = false;
+
+glm::vec4 g_CameraPos = glm::vec4(0.0f, 0.5f, 5.0f, 1.0f);
+
+void UpdatePlayerPosition(glm::vec4 view_vector, glm::vec4 up)
+{
+    float speed = SPEED;
+
+    glm::vec4 forward = glm::normalize(glm::vec4(view_vector.x, 0.0f, view_vector.z, 0.0f));
+    glm::vec4 side = crossproduct(up, forward);
+
+    if (g_W_Pressed) g_CameraPos += forward * speed;
+    if (g_S_Pressed) g_CameraPos -= forward * speed;
+    if (g_A_Pressed) g_CameraPos += side * speed;
+    if (g_D_Pressed) g_CameraPos -= side * speed;
+}
 
 int main(int argc, char* argv[])
 {
@@ -346,7 +378,7 @@ int main(int argc, char* argv[])
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
-
+    
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
     {
@@ -358,7 +390,8 @@ int main(int argc, char* argv[])
         // Conversaremos sobre sistemas de cores nas aulas de Modelos de Iluminação.
         //
         //           R     G     B     A
-        glClearColor(0.9f, 0.9f, 1.0f, 1.0f);
+        GLfloat background_color[] = { COR_R, COR_G, COR_B, COR_A };
+        glClearColor(background_color[0], background_color[1], background_color[2], background_color[3]); //cor do fundo = azul claro
 
         // "Pintamos" todos os pixels do framebuffer com a cor definida acima,
         // e também resetamos todos os pixels do Z-buffer (depth buffer).
@@ -372,21 +405,30 @@ int main(int argc, char* argv[])
         // variáveis g_CameraDistance, g_CameraPhi, e g_CameraTheta são
         // controladas pelo mouse do usuário. Veja as funções CursorPosCallback()
         // e ScrollCallback().
-        float r = g_CameraDistance;
-        float y = r*sin(g_CameraPhi);
-        float z = r*cos(g_CameraPhi)*cos(g_CameraTheta);
-        float x = r*cos(g_CameraPhi)*sin(g_CameraTheta);
+
+        
+        glm::vec4 view_vector = glm::vec4(cos(g_CameraPhi) * sin(g_CameraTheta),
+        sin(g_CameraPhi),
+        cos(g_CameraPhi) * cos(g_CameraTheta),
+        0.0f);
+
+        glm::vec4 up = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
+
+        UpdatePlayerPosition(view_vector, up);
+
+        glm::mat4 view = Matrix_Camera_View(g_CameraPos, view_vector, up);
 
         // Abaixo definimos as varáveis que efetivamente definem a câmera virtual.
         // Veja slides 195-227 e 229-234 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
-        glm::vec4 camera_position_c  = glm::vec4(x,y,z,1.0f); // Ponto "c", centro da câmera
+        /*glm::vec4 camera_position_c  = glm::vec4(x,y,z,1.0f); // Ponto "c", centro da câmera
         glm::vec4 camera_lookat_l    = glm::vec4(0.0f,0.0f,0.0f,1.0f); // Ponto "l", para onde a câmera (look-at) estará sempre olhando
         glm::vec4 camera_view_vector = camera_lookat_l - camera_position_c; // Vetor "view", sentido para onde a câmera está virada
         glm::vec4 camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f); // Vetor "up" fixado para apontar para o "céu" (eito Y global)
-
+        */
         // Computamos a matriz "View" utilizando os parâmetros da câmera para
         // definir o sistema de coordenadas da câmera.  Veja slides 2-14, 184-190 e 236-242 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
-        glm::mat4 view = Matrix_Camera_View(camera_position_c, camera_view_vector, camera_up_vector);
+        //glm::mat4 view = Matrix_Camera_View(camera_position_c, camera_view_vector, camera_up_vector);
+
 
         // Agora computamos a matriz de Projeção.
         glm::mat4 projection;
@@ -400,7 +442,7 @@ int main(int argc, char* argv[])
         {
             // Projeção Perspectiva.
             // Para definição do field of view (FOV), veja slides 205-215 do documento Aula_09_Projecoes.pdf.
-            float field_of_view = 3.141592 / 3.0f;
+            float field_of_view = PI / 3.0f;
             projection = Matrix_Perspective(field_of_view, g_ScreenRatio, nearplane, farplane);
         }
         else
@@ -1149,10 +1191,10 @@ void CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
     
         // Atualizamos parâmetros da câmera com os deslocamentos
         g_CameraTheta -= 0.01f*dx;
-        g_CameraPhi   += 0.01f*dy;
+        g_CameraPhi   -= 0.01f*dy;
     
         // Em coordenadas esféricas, o ângulo phi deve ficar entre -pi/2 e +pi/2.
-        float phimax = 3.141592f/2;
+        float phimax = PIF/2;
         float phimin = -phimax;
     
         if (g_CameraPhi > phimax)
@@ -1241,7 +1283,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
     //   Se apertar tecla Z       então g_AngleZ += delta;
     //   Se apertar tecla shift+Z então g_AngleZ -= delta;
 
-    float delta = 3.141592 / 16; // 22.5 graus, em radianos.
+    float delta = PI / 16; // 22.5 graus, em radianos.
 
     if (key == GLFW_KEY_X && action == GLFW_PRESS)
     {
@@ -1294,6 +1336,11 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
         fprintf(stdout,"Shaders recarregados!\n");
         fflush(stdout);
     }
+    
+    if (key == GLFW_KEY_W) g_W_Pressed = (action != GLFW_RELEASE);
+    if (key == GLFW_KEY_A) g_A_Pressed = (action != GLFW_RELEASE);
+    if (key == GLFW_KEY_S) g_S_Pressed = (action != GLFW_RELEASE);
+    if (key == GLFW_KEY_D) g_D_Pressed = (action != GLFW_RELEASE);
 }
 
 // Definimos o callback para impressão de erros da GLFW no terminal
@@ -1374,7 +1421,7 @@ void TextRendering_ShowEulerAngles(GLFWwindow* window)
     float pad = TextRendering_LineHeight(window);
 
     char buffer[80];
-    snprintf(buffer, 80, "Euler Angles rotation matrix = Z(%.2f)*Y(%.2f)*X(%.2f)\n", g_AngleZ, g_AngleY, g_AngleX);
+    snprintf(buffer, 80, "GLiminal 1.0");
 
     TextRendering_PrintString(window, buffer, -1.0f+pad/10, -1.0f+2*pad/10, 1.0f);
 }

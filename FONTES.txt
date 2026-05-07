@@ -1,0 +1,8 @@
+TEXTURAS
+https://polyhaven.com/a/wood_floor
+
+OBJETOS
+https://polyhaven.com/a/chess_set
+
+OUTROS
+https://learnopengl.com/Getting-started/Camera
