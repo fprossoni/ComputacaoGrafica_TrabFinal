@@ -23,6 +23,8 @@ uniform mat4 projection;
 #define BUNNY  1
 #define PLANE  2
 #define CHESS_WHITE_PIECE 3
+#define VELVET_FLOOR 4
+#define METAL_FLOOR 5
 uniform int object_id;
 
 // Parâmetros da axis-aligned bounding box (AABB) do modelo
@@ -33,6 +35,8 @@ uniform vec4 bbox_max;
 uniform sampler2D TextureImage0;
 uniform sampler2D TextureImage1;
 uniform sampler2D TextureImage2;
+uniform sampler2D TextureImage3;
+uniform sampler2D TextureImage4;
 
 // O valor de saída ("out") de um Fragment Shader é a cor final do fragmento.
 out vec4 color;
@@ -130,12 +134,18 @@ void main()
     else if ( object_id == PLANE )
     {
         // Coordenadas de textura do plano, obtidas do arquivo OBJ.
-        U = texcoords.x;
-        V = texcoords.y;
+        U = texcoords.x * 5;
+        V = texcoords.y * 5;
 
 		// Obtemos a refletância difusa a partir da leitura da imagem TextureImage1
-		Kd0 = texture(TextureImage1, vec2(U,V)).rgb;
+		vec3 texture = texture(TextureImage4, vec2(U,V)).rgb;
+        vec3 texture_color = vec3(0.15, 0.45, 0.28);
+
+        // 0.0 = só textura
+        // 1.0 = só cor
+        Kd0 = mix(texture, texture_color, 0.5);
     }
+    
     else if ( object_id == CHESS_WHITE_PIECE )
     {
         // PREENCHA AQUI as coordenadas de textura do coelho, computadas com

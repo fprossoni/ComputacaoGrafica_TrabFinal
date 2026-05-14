@@ -1,0 +1,21 @@
+# MTL file - created by a modified js OBJExporter
+
+newmtl velour_velvet
+Tr 0.0000
+Tf 1.0000 1.0000 1.0000
+illum 1
+Pm 1
+Pr 1
+Pds 1
+Pl 1
+Pccns 1-1
+Prfl 0.5
+Pior 1.5
+Psh 1
+Pshc 1 0.31658321619033813 0.39531147480010986
+Pshr 0.239130437374115
+Psi 1
+Psc 1 1 1
+Ka 1 1 1
+Kd 1 1 1
+Ke 0 0 0
