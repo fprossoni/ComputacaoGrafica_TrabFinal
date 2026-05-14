@@ -1,8 +1,12 @@
 TEXTURAS
 https://polyhaven.com/a/wood_floor
+https://polyhaven.com/a/metal_plate
+https://polyhaven.com/a/velour_velvet
 
 OBJETOS
 https://polyhaven.com/a/chess_set
+https://polyhaven.com/a/rubber_duck_toy
+
 
 OUTROS
 https://learnopengl.com/Getting-started/Camera
