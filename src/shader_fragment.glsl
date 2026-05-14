@@ -25,6 +25,7 @@ uniform mat4 projection;
 #define CHESS_WHITE_PIECE 3
 #define VELVET_FLOOR 4
 #define METAL_FLOOR 5
+#define RUBBER_DUCK 6
 uniform int object_id;
 
 // Parâmetros da axis-aligned bounding box (AABB) do modelo
@@ -37,6 +38,7 @@ uniform sampler2D TextureImage1;
 uniform sampler2D TextureImage2;
 uniform sampler2D TextureImage3;
 uniform sampler2D TextureImage4;
+uniform sampler2D TextureImage5;
 
 // O valor de saída ("out") de um Fragment Shader é a cor final do fragmento.
 out vec4 color;
@@ -134,8 +136,8 @@ void main()
     else if ( object_id == PLANE )
     {
         // Coordenadas de textura do plano, obtidas do arquivo OBJ.
-        U = texcoords.x * 5;
-        V = texcoords.y * 5;
+        U = texcoords.x * 25;
+        V = texcoords.y * 25;
 
 		// Obtemos a refletância difusa a partir da leitura da imagem TextureImage1
 		vec3 texture = texture(TextureImage4, vec2(U,V)).rgb;
@@ -157,25 +159,29 @@ void main()
         // 'h' no slides 158-160 do documento Aula_20_Mapeamento_de_Texturas.pdf.
         // Veja também a Questão 4 do Questionário 4 no Moodle.
 
-        /*
-        float minx = bbox_min.x;
-        float maxx = bbox_max.x;
-
-        float miny = bbox_min.y;
-        float maxy = bbox_max.y;
-
-        float minz = bbox_min.z;
-        float maxz = bbox_max.z;
-
-        U = (position_model.x - minx) / (maxx - minx);
-        V = (position_model.y - miny) / (maxy - miny);
-        */
-
         float U = texcoords.x;
         float V = texcoords.y; 
 
 		// Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
 		Kd0 = texture(TextureImage2, vec2(U,V)).rgb;
+    }
+
+    else if ( object_id == RUBBER_DUCK )
+    {
+        // PREENCHA AQUI as coordenadas de textura do coelho, computadas com
+        // projeção planar XY em COORDENADAS DO MODELO. Utilize como referência
+        // o slides 99-104 do documento Aula_20_Mapeamento_de_Texturas.pdf,
+        // e também use as variáveis min*/max* definidas abaixo para normalizar
+        // as coordenadas de textura U e V dentro do intervalo [0,1]. Para
+        // tanto, veja por exemplo o mapeamento da variável 'p_v' utilizando
+        // 'h' no slides 158-160 do documento Aula_20_Mapeamento_de_Texturas.pdf.
+        // Veja também a Questão 4 do Questionário 4 no Moodle.
+
+        float U = texcoords.x;
+        float V = texcoords.y; 
+
+		// Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
+		Kd0 = texture(TextureImage5, vec2(U,V)).rgb;
     }
 
     // Equação de Iluminação

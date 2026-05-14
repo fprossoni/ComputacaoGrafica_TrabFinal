@@ -235,7 +235,7 @@ GLuint g_NumLoadedTextures = 0;
 #define COR_B 0.863f
 #define COR_A 0.8f
 
-#define SPEED 0.015f
+#define SPEED 0.01f
 
 bool g_W_Pressed = false;
 bool g_A_Pressed = false;
@@ -340,6 +340,7 @@ int main(int argc, char* argv[])
     LoadTextureImage("../../data/textures/chess_set_pieces_white_diff_1k.jpg"); // TextureImage2
     LoadTextureImage("../../data/textures/velour_velvet_diff_1k.jpg"); // TextureImage3
     LoadTextureImage("../../data/textures/metal_plate_diff_2k.jpg"); // TextureImage4
+    LoadTextureImage("../../data/textures/rubber_duck_toy_diff_4k.jpg"); // TextureImage5
   
 
     // Construímos a representação de objetos geométricos através de malhas de triângulos
@@ -359,9 +360,9 @@ int main(int argc, char* argv[])
     ComputeNormals(&chessmodel);
     BuildTrianglesAndAddToVirtualScene(&chessmodel);
 
-    ObjModel velvet_floor("../../data/velour_velvet_1k.obj");
-    ComputeNormals(&velvet_floor);
-    BuildTrianglesAndAddToVirtualScene(&velvet_floor);
+    ObjModel rubber_duck("../../data/rubber_duck_toy_4k.obj");
+    ComputeNormals(&rubber_duck);
+    BuildTrianglesAndAddToVirtualScene(&rubber_duck);
 
 
     if ( argc > 1 )
@@ -470,9 +471,10 @@ int main(int argc, char* argv[])
         #define CHESS_WHITE_PIECE 3
         #define VELVET_FLOOR 4
         #define METAL_FLOOR 5
+        #define RUBBER_DUCK 6
 
         // Desenhamos pecas de xadrez
-        model = Matrix_Translate(0.0f,0.0f,0.0f)
+        model = Matrix_Translate(0.0f,0.001f,0.0f)
               * Matrix_Scale(5.0f, 5.0f, 5.0f);
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, CHESS_WHITE_PIECE);
@@ -487,10 +489,22 @@ int main(int argc, char* argv[])
 
         // Desenhamos o plano do chão
         model = Matrix_Translate(0.0f,0.0f,0.0f) 
-                * Matrix_Scale(1.0f, 1.0f, 1.0f);
+                * Matrix_Scale(5.0f, 0.1f, 5.0f);
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, PLANE);
         DrawVirtualObject("the_plane");
+
+        model = Matrix_Translate(-1.0f,0.001f,-1.0f) 
+                * Matrix_Scale(1.0f, 1.0f, 1.0f);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, RUBBER_DUCK);
+        DrawVirtualObject("rubber_duck_toy");
+
+        model = Matrix_Translate(-2.0f,0.001f,-1.0f) 
+                * Matrix_Scale(2.0f, 0.1f, 2.0f);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, RUBBER_DUCK);
+        DrawVirtualObject("rubber_duck_toy");
 
 
         // Imprimimos na tela os ângulos de Euler que controlam a rotação do
@@ -661,6 +675,7 @@ void LoadShadersFromFiles()
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage2"), 2);
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage3"), 3);
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage4"), 4);
+    glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage5"), 5);
     glUseProgram(0);
 }
 
