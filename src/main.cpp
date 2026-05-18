@@ -235,7 +235,7 @@ GLuint g_NumLoadedTextures = 0;
 #define COR_B 0.863f
 #define COR_A 0.8f
 
-#define SPEED 0.01f
+#define SPEED 0.05f
 
 bool g_W_Pressed = false;
 bool g_A_Pressed = false;
@@ -341,6 +341,8 @@ int main(int argc, char* argv[])
     LoadTextureImage("../../data/textures/velour_velvet_diff_1k.jpg"); // TextureImage3
     LoadTextureImage("../../data/textures/metal_plate_diff_2k.jpg"); // TextureImage4
     LoadTextureImage("../../data/textures/rubber_duck_toy_diff_4k.jpg"); // TextureImage5
+    LoadTextureImage("../../data/textures/box_profile_metal_sheet_diff_2k.jpg"); // TextureImage6
+    LoadTextureImage("../../data/textures/Poliigon_MetalPaintedMatte_7037_BaseColor.jpg"); // TextureImage7
   
 
     // Construímos a representação de objetos geométricos através de malhas de triângulos
@@ -408,6 +410,12 @@ int main(int argc, char* argv[])
         // variáveis g_CameraDistance, g_CameraPhi, e g_CameraTheta são
         // controladas pelo mouse do usuário. Veja as funções CursorPosCallback()
         // e ScrollCallback().
+        /*
+        float r = g_CameraDistance;
+        float y = r*sin(g_CameraPhi);
+        float z = r*cos(g_CameraPhi)*cos(g_CameraTheta);
+        float x = r*cos(g_CameraPhi)*sin(g_CameraTheta);
+        */
 
         
         glm::vec4 view_vector = glm::vec4(cos(g_CameraPhi) * sin(g_CameraTheta),
@@ -472,6 +480,9 @@ int main(int argc, char* argv[])
         #define VELVET_FLOOR 4
         #define METAL_FLOOR 5
         #define RUBBER_DUCK 6
+        #define METAL_WALL 7
+        #define METAL_CEILING 8
+
 
         // Desenhamos pecas de xadrez
         model = Matrix_Translate(0.0f,0.001f,0.0f)
@@ -505,6 +516,41 @@ int main(int argc, char* argv[])
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, RUBBER_DUCK);
         DrawVirtualObject("rubber_duck_toy");
+
+        model = Matrix_Translate(0.0f, 1.5f, -5.0f) //PAREDE EM -Z
+                * Matrix_Rotate(PI / 2.0f, glm::vec4(1.0f, 0.0f, 0.0f, 0.0f))
+                * Matrix_Scale(5.0f, 0.0f, 1.5f);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, METAL_WALL);
+        DrawVirtualObject("the_plane");
+
+        model = Matrix_Translate(0.0f, 1.5f, 5.0f)  //PAREDE EM +Z
+                * Matrix_Rotate(-PI / 2.0f, glm::vec4(1.0f, 0.0f, 0.0f, 0.0f))
+                * Matrix_Scale(5.0f, 0.0f, 1.5f);
+        glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, METAL_WALL);
+        DrawVirtualObject("the_plane");
+
+        model = Matrix_Translate(-5.0f, 1.5f, 0.0f) //PAREDE EM -X
+                * Matrix_Rotate(-PI / 2.0f, glm::vec4(0.0f, 0.0f, 1.0f, 0.0f))
+                * Matrix_Scale(1.5f, 0.0f, 5.0f);
+        glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, METAL_WALL);
+        DrawVirtualObject("the_plane");
+
+        model = Matrix_Translate(5.0f, 1.5f, 0.0f) //PAREDE EM +X
+                * Matrix_Rotate(PI / 2.0f, glm::vec4(0.0f, 0.0f, 1.0f, 0.0f))
+                * Matrix_Scale(1.5f, 0.0f, 5.0f);
+        glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, METAL_WALL);
+        DrawVirtualObject("the_plane");
+
+        model = Matrix_Translate(0.0f, 3.0f, 0.0f) //TETO
+                * Matrix_Rotate(PI, glm::vec4(1.0f, 0.0f, 0.0f, 0.0f))
+                * Matrix_Scale(5.0f, 0.1f, 5.0f);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, METAL_CEILING);
+        DrawVirtualObject("the_plane");
 
 
         // Imprimimos na tela os ângulos de Euler que controlam a rotação do
@@ -676,6 +722,8 @@ void LoadShadersFromFiles()
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage3"), 3);
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage4"), 4);
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage5"), 5);
+    glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage6"), 6);
+    glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage7"), 7);
     glUseProgram(0);
 }
 
@@ -1428,17 +1476,17 @@ void TextRendering_ShowModelViewProjection(
 
 // Escrevemos na tela os ângulos de Euler definidos nas variáveis globais
 // g_AngleX, g_AngleY, e g_AngleZ.
+
 void TextRendering_ShowEulerAngles(GLFWwindow* window)
 {
     if ( !g_ShowInfoText )
         return;
 
     float pad = TextRendering_LineHeight(window);
+    char buffer[100];
 
-    char buffer[80];
-    snprintf(buffer, 80, "GLiminal 1.0");
-
-    TextRendering_PrintString(window, buffer, -1.0f+pad/10, -1.0f+2*pad/10, 1.0f);
+    snprintf(buffer, sizeof(buffer), "GLiminal 1.0 - Player Pos: X = %.2f | Y = %.2f | Z = %.2f\n", g_CameraPos.x, g_CameraPos.y, g_CameraPos.z);
+    TextRendering_PrintString(window, buffer, -1.0f + pad/10, -1.0f + 2*pad/10, 1.0f);
 }
 
 // Escrevemos na tela qual matriz de projeção está sendo utilizada.

@@ -26,6 +26,8 @@ uniform mat4 projection;
 #define VELVET_FLOOR 4
 #define METAL_FLOOR 5
 #define RUBBER_DUCK 6
+#define METAL_WALL 7
+#define METAL_CEILING 8
 uniform int object_id;
 
 // Parâmetros da axis-aligned bounding box (AABB) do modelo
@@ -39,6 +41,8 @@ uniform sampler2D TextureImage2;
 uniform sampler2D TextureImage3;
 uniform sampler2D TextureImage4;
 uniform sampler2D TextureImage5;
+uniform sampler2D TextureImage6;
+uniform sampler2D TextureImage7;
 
 // O valor de saída ("out") de um Fragment Shader é a cor final do fragmento.
 out vec4 color;
@@ -147,6 +151,45 @@ void main()
         // 1.0 = só cor
         Kd0 = mix(texture, texture_color, 0.5);
     }
+
+    else if ( object_id == METAL_WALL )
+    {
+        // Coordenadas de textura do plano, obtidas do arquivo OBJ.
+        U = texcoords.x * 3;
+        V = texcoords.y * 3;
+        Kd0 = texture(TextureImage6, vec2(U,V)).rgb;
+
+        /*
+		// Obtemos a refletância difusa a partir da leitura da imagem TextureImage1
+		vec3 texture = texture(TextureImage6, vec2(U,V)).rgb;
+        vec3 texture_color = vec3(0.87, 0.87, 0.87);
+
+        // 0.0 = só textura
+        // 1.0 = só cor
+        Kd0 = mix(texture, texture_color, 0);
+        */
+    }
+
+    else if ( object_id == METAL_CEILING)
+    {
+        // Coordenadas de textura do plano, obtidas do arquivo OBJ.
+        U = texcoords.x * 3;
+        V = texcoords.y * 3;
+        Kd0 = texture(TextureImage7, vec2(U,V)).rgb;
+
+        /*
+		// Obtemos a refletância difusa a partir da leitura da imagem TextureImage1
+		vec3 texture = texture(TextureImage6, vec2(U,V)).rgb;
+        vec3 texture_color = vec3(0.87, 0.87, 0.87);
+
+        // 0.0 = só textura
+        // 1.0 = só cor
+        Kd0 = mix(texture, texture_color, 0.7);
+        */
+
+    }
+
+    
     
     else if ( object_id == CHESS_WHITE_PIECE )
     {
