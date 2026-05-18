@@ -2,6 +2,9 @@ TEXTURAS
 https://polyhaven.com/a/wood_floor
 https://polyhaven.com/a/metal_plate
 https://polyhaven.com/a/velour_velvet
+https://polyhaven.com/a/box_profile_metal_sheet
+https://texturelabs.org/textures/metal_214/
+https://www.poliigon.com/texture/matte-metal-texture-black/7037
 
 OBJETOS
 https://polyhaven.com/a/chess_set
