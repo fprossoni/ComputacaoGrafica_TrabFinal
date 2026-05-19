@@ -241,9 +241,9 @@ bool g_W_Pressed = false;
 bool g_A_Pressed = false;
 bool g_S_Pressed = false;
 bool g_D_Pressed = false;
+bool g_SPACE_Pressed =false;
 
 glm::vec4 g_CameraPos = glm::vec4(0.0f, 0.5f, 0.0f, 1.0f);
-
 void UpdatePlayerPosition(glm::vec4 view_vector, glm::vec4 up)
 {
     float speed = SPEED;
@@ -255,6 +255,7 @@ void UpdatePlayerPosition(glm::vec4 view_vector, glm::vec4 up)
     if (g_S_Pressed) g_CameraPos -= forward * speed;
     if (g_A_Pressed) g_CameraPos += side * speed;
     if (g_D_Pressed) g_CameraPos -= side * speed;
+    if (g_SPACE_Pressed) g_CameraPos[1] += 0.08f;
 }
 
 int main(int argc, char* argv[])
@@ -342,8 +343,8 @@ int main(int argc, char* argv[])
     LoadTextureImage("../../data/textures/metal_plate_diff_2k.jpg"); // TextureImage4
     LoadTextureImage("../../data/textures/rubber_duck_toy_diff_4k.jpg"); // TextureImage5
     LoadTextureImage("../../data/textures/box_profile_metal_sheet_diff_2k.jpg"); // TextureImage6
-    LoadTextureImage("../../data/textures/Poliigon_MetalPaintedMatte_7037_BaseColor.jpg"); // TextureImage7
-  
+    LoadTextureImage("../../data/textures/Poliigon_MetalPaintedMatte_7037_BaseColor.jpg"); // TextureImage7 
+    LoadTextureImage("../../data/textures/ceiling_fan_diff_1k.jpg"); // TextureImage8
 
     // Construímos a representação de objetos geométricos através de malhas de triângulos
     ObjModel spheremodel("../../data/sphere.obj");
@@ -365,6 +366,10 @@ int main(int argc, char* argv[])
     ObjModel rubber_duck("../../data/rubber_duck_toy_4k.obj");
     ComputeNormals(&rubber_duck);
     BuildTrianglesAndAddToVirtualScene(&rubber_duck);
+
+    ObjModel ceiling_fan("../../data/ceiling_fan_1k.obj");
+    ComputeNormals(&ceiling_fan);
+    BuildTrianglesAndAddToVirtualScene(&ceiling_fan);
 
 
     if ( argc > 1 )
@@ -425,7 +430,12 @@ int main(int argc, char* argv[])
 
         glm::vec4 up = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
 
+        float seconds = (float)glfwGetTime();
+
         UpdatePlayerPosition(view_vector, up);
+        if (g_CameraPos[1] > 0.5f){
+            g_CameraPos[1] -= 0.015f;
+        }
 
         glm::mat4 view = Matrix_Camera_View(g_CameraPos, view_vector, up);
 
@@ -481,8 +491,9 @@ int main(int argc, char* argv[])
         #define METAL_FLOOR 5
         #define RUBBER_DUCK 6
         #define METAL_WALL 7
+        #define METAL_WALL_2 10
         #define METAL_CEILING 8
-
+        #define CEILING_FAN 9
 
         // Desenhamos pecas de xadrez
         model = Matrix_Translate(0.0f,0.001f,0.0f)
@@ -517,32 +528,64 @@ int main(int argc, char* argv[])
         glUniform1i(g_object_id_uniform, RUBBER_DUCK);
         DrawVirtualObject("rubber_duck_toy");
 
-        model = Matrix_Translate(0.0f, 1.5f, -5.0f) //PAREDE EM -Z
+        model = Matrix_Translate(0.0f, 1.8f, -5.0f) //PAREDE EM -Z
                 * Matrix_Rotate(PI / 2.0f, glm::vec4(1.0f, 0.0f, 0.0f, 0.0f))
-                * Matrix_Scale(5.0f, 0.0f, 1.5f);
+                * Matrix_Scale(5.0f, 1.0f, 1.2f);
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, METAL_WALL);
         DrawVirtualObject("the_plane");
 
-        model = Matrix_Translate(0.0f, 1.5f, 5.0f)  //PAREDE EM +Z
+        model = Matrix_Translate(0.0f, 0.3f, -5.0f) //PAREDE EM -Z AUXILIAR
+                * Matrix_Rotate(PI / 2.0f, glm::vec4(1.0f, 0.0f, 0.0f, 0.0f))
+                * Matrix_Scale(5.0f, 1.0f, 0.3f);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, METAL_WALL_2);
+        DrawVirtualObject("the_plane");
+
+        model = Matrix_Translate(0.0f, 1.8f, 5.0f)  //PAREDE EM +Z
                 * Matrix_Rotate(-PI / 2.0f, glm::vec4(1.0f, 0.0f, 0.0f, 0.0f))
-                * Matrix_Scale(5.0f, 0.0f, 1.5f);
+                * Matrix_Scale(5.0f, 1.0f, 1.2f);
         glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, METAL_WALL);
         DrawVirtualObject("the_plane");
 
-        model = Matrix_Translate(-5.0f, 1.5f, 0.0f) //PAREDE EM -X
+        model = Matrix_Translate(0.0f, 0.3f, 5.0f)  //PAREDE EM +Z AUXILIAR
+                * Matrix_Rotate(-PI / 2.0f, glm::vec4(1.0f, 0.0f, 0.0f, 0.0f))
+                * Matrix_Scale(5.0f, 1.0f, 0.3f);
+        glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, METAL_WALL_2);
+        DrawVirtualObject("the_plane");
+
+        model = Matrix_Translate(-5.0f, 1.8f, 0.0f) //PAREDE EM -X
+                * Matrix_Rotate(PI / 2.0f, glm::vec4(1.0f, 0.0f, 0.0f, 0.0f))
                 * Matrix_Rotate(-PI / 2.0f, glm::vec4(0.0f, 0.0f, 1.0f, 0.0f))
-                * Matrix_Scale(1.5f, 0.0f, 5.0f);
+                * Matrix_Scale(5.0f, 1.0f, 1.2f);
         glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, METAL_WALL);
         DrawVirtualObject("the_plane");
 
-        model = Matrix_Translate(5.0f, 1.5f, 0.0f) //PAREDE EM +X
+        model = Matrix_Translate(-5.0f, 0.3f, 0.0f) //PAREDE EM -X AUXILIAR
+                * Matrix_Rotate(PI / 2.0f, glm::vec4(1.0f, 0.0f, 0.0f, 0.0f))
+                * Matrix_Rotate(-PI / 2.0f, glm::vec4(0.0f, 0.0f, 1.0f, 0.0f))
+                * Matrix_Scale(5.0f, 1.0f, 0.3f);
+        glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, METAL_WALL_2);
+        DrawVirtualObject("the_plane");
+
+        model = Matrix_Translate(5.0f, 1.8f, 0.0f) //PAREDE EM +X
+                * Matrix_Rotate(-PI / 2.0f, glm::vec4(1.0f, 0.0f, 0.0f, 0.0f))
                 * Matrix_Rotate(PI / 2.0f, glm::vec4(0.0f, 0.0f, 1.0f, 0.0f))
-                * Matrix_Scale(1.5f, 0.0f, 5.0f);
+                * Matrix_Scale(5.0f, 1.0f, 1.2f);
         glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, METAL_WALL);
+        DrawVirtualObject("the_plane");
+
+        model = Matrix_Translate(5.0f, 0.3f, 0.0f) //PAREDE EM +X AUXILIAR
+                * Matrix_Rotate(-PI / 2.0f, glm::vec4(1.0f, 0.0f, 0.0f, 0.0f))
+                * Matrix_Rotate(PI / 2.0f, glm::vec4(0.0f, 0.0f, 1.0f, 0.0f))
+                * Matrix_Scale(5.0f, 1.0f, 0.3f);
+        glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, METAL_WALL_2);
         DrawVirtualObject("the_plane");
 
         model = Matrix_Translate(0.0f, 3.0f, 0.0f) //TETO
@@ -551,6 +594,14 @@ int main(int argc, char* argv[])
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, METAL_CEILING);
         DrawVirtualObject("the_plane");
+
+        model = Matrix_Rotate(seconds * 2, glm::vec4(0.0f, 1.0f, 0.0f, 0.0f))
+                * Matrix_Translate(0.0f,3.0f,0.0f);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, CEILING_FAN);
+        DrawVirtualObject("ceiling_fan");
+        DrawVirtualObject("ceiling_fan_blades");
+
 
 
         // Imprimimos na tela os ângulos de Euler que controlam a rotação do
@@ -615,6 +666,7 @@ void LoadTextureImage(const char* filename)
     // Veja slides 95-96 do documento Aula_20_Mapeamento_de_Texturas.pdf
     glSamplerParameteri(sampler_id, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
     glSamplerParameteri(sampler_id, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+
 
     // Parâmetros de amostragem da textura.
     glSamplerParameteri(sampler_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -724,6 +776,7 @@ void LoadShadersFromFiles()
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage5"), 5);
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage6"), 6);
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage7"), 7);
+    glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage8"), 8);
     glUseProgram(0);
 }
 
@@ -1404,6 +1457,8 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
     if (key == GLFW_KEY_A) g_A_Pressed = (action != GLFW_RELEASE);
     if (key == GLFW_KEY_S) g_S_Pressed = (action != GLFW_RELEASE);
     if (key == GLFW_KEY_D) g_D_Pressed = (action != GLFW_RELEASE);
+    if (key == GLFW_KEY_SPACE) g_SPACE_Pressed = (action != GLFW_RELEASE);
+
 }
 
 // Definimos o callback para impressão de erros da GLFW no terminal

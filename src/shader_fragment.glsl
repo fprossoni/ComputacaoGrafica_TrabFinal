@@ -28,6 +28,8 @@ uniform mat4 projection;
 #define RUBBER_DUCK 6
 #define METAL_WALL 7
 #define METAL_CEILING 8
+#define CEILING_FAN 9
+#define METAL_WALL_2 10
 uniform int object_id;
 
 // Parâmetros da axis-aligned bounding box (AABB) do modelo
@@ -43,6 +45,8 @@ uniform sampler2D TextureImage4;
 uniform sampler2D TextureImage5;
 uniform sampler2D TextureImage6;
 uniform sampler2D TextureImage7;
+uniform sampler2D TextureImage8;
+
 
 // O valor de saída ("out") de um Fragment Shader é a cor final do fragmento.
 out vec4 color;
@@ -154,20 +158,11 @@ void main()
 
     else if ( object_id == METAL_WALL )
     {
-        // Coordenadas de textura do plano, obtidas do arquivo OBJ.
-        U = texcoords.x * 3;
-        V = texcoords.y * 3;
-        Kd0 = texture(TextureImage6, vec2(U,V)).rgb;
-
-        /*
-		// Obtemos a refletância difusa a partir da leitura da imagem TextureImage1
-		vec3 texture = texture(TextureImage6, vec2(U,V)).rgb;
-        vec3 texture_color = vec3(0.87, 0.87, 0.87);
-
-        // 0.0 = só textura
-        // 1.0 = só cor
-        Kd0 = mix(texture, texture_color, 0);
-        */
+        Kd0 = vec3(0.78, 0.67, 0.48);
+    }
+    else if ( object_id == METAL_WALL_2 )
+    {
+        Kd0 = vec3(0.13, 0.42, 0.30);
     }
 
     else if ( object_id == METAL_CEILING)
@@ -175,18 +170,36 @@ void main()
         // Coordenadas de textura do plano, obtidas do arquivo OBJ.
         U = texcoords.x * 3;
         V = texcoords.y * 3;
-        Kd0 = texture(TextureImage7, vec2(U,V)).rgb;
+        //Kd0 = texture(TextureImage7, vec2(U,V)).rgb;
 
-        /*
+        
 		// Obtemos a refletância difusa a partir da leitura da imagem TextureImage1
 		vec3 texture = texture(TextureImage6, vec2(U,V)).rgb;
         vec3 texture_color = vec3(0.87, 0.87, 0.87);
 
         // 0.0 = só textura
         // 1.0 = só cor
-        Kd0 = mix(texture, texture_color, 0.7);
-        */
+        Kd0 = mix(texture, texture_color, 1);
+        
 
+    }
+
+    else if ( object_id == CEILING_FAN )
+    {
+        // PREENCHA AQUI as coordenadas de textura do coelho, computadas com
+        // projeção planar XY em COORDENADAS DO MODELO. Utilize como referência
+        // o slides 99-104 do documento Aula_20_Mapeamento_de_Texturas.pdf,
+        // e também use as variáveis min*/max* definidas abaixo para normalizar
+        // as coordenadas de textura U e V dentro do intervalo [0,1]. Para
+        // tanto, veja por exemplo o mapeamento da variável 'p_v' utilizando
+        // 'h' no slides 158-160 do documento Aula_20_Mapeamento_de_Texturas.pdf.
+        // Veja também a Questão 4 do Questionário 4 no Moodle.
+
+        float U = texcoords.x;
+        float V = texcoords.y; 
+
+		// Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
+		Kd0 = texture(TextureImage8, vec2(U,V)).rgb;
     }
 
     
