@@ -6,8 +6,7 @@ https://moodle.ufrgs.br/mod/assign/view.php?id=6018620
 
 TODO:
 
-encontrar objetos decorativos: cubos, lampadas, portas, mesas, etc
-implementar pulo
-implementar colisao com objetos e paredes/plano
-verificar rotacao da textura da parede
-adicionar gravidade para os objetos
+implementar colisoes
+encontrar modelos de decoracao
+implementar pulo sobre objetos
+criar habilidade de pegar e soltar objetos (reposicionar)
