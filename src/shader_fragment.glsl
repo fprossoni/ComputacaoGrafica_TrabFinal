@@ -7,6 +7,10 @@
 in vec4 position_world;
 in vec4 normal;
 
+uniform vec3 lightPos; //iluminacao
+uniform vec3 viewPos;
+uniform vec3 lightColor;
+
 // Posição do vértice atual no sistema de coordenadas local do modelo.
 in vec4 position_model;
 
@@ -57,6 +61,7 @@ out vec4 color;
 
 void main()
 {
+    /*
     // Obtemos a posição da câmera utilizando a inversa da matriz que define o
     // sistema de coordenadas da câmera.
     vec4 origin = vec4(0.0, 0.0, 0.0, 1.0);
@@ -78,7 +83,7 @@ void main()
 
     // Vetor que define o sentido da câmera em relação ao ponto atual.
     vec4 v = normalize(camera_position - p);
-
+    */
     // Coordenadas de textura U e V
     float U = 0.0;
     float V = 0.0;
@@ -147,13 +152,7 @@ void main()
         U = texcoords.x * 25;
         V = texcoords.y * 25;
 
-		// Obtemos a refletância difusa a partir da leitura da imagem TextureImage1
-		vec3 texture = texture(TextureImage4, vec2(U,V)).rgb;
-        vec3 texture_color = vec3(0.15, 0.45, 0.28);
-
-        // 0.0 = só textura
-        // 1.0 = só cor
-        Kd0 = mix(texture, texture_color, 0.5);
+		Kd0 = texture(TextureImage4, vec2(U,V)).rgb;
     }
 
     else if ( object_id == METAL_WALL )
@@ -239,7 +238,41 @@ void main()
 		// Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
 		Kd0 = texture(TextureImage5, vec2(U,V)).rgb;
     }
+    
+    vec3 fragPosVec3 = position_world.xyz;
+    vec3 n = normalize(normal.xyz); //normal objetos
+    
+    vec3 l = normalize(lightPos - fragPosVec3); // direcao pixel para luz
+    vec3 v = normalize(viewPos - fragPosVec3);  // direcao pixel ate a camera
+    vec3 h = normalize(l + v);
 
+    float distance = length(lightPos - fragPosVec3);
+    float constant = 1.0;
+    float linear = 0.09;
+    float quadratic = 0.032; //0.032 sala media | 0.007 sala grandee | 0.1 lanterna
+    float attenuation = 1.0 / (constant + linear * distance + quadratic * (distance * distance));
+
+    //vec3 ambientColor = vec3(0.08, 0.08, 0.1); // sombras do ambiente= 0.0 completamente escuro |
+    vec3 ambientColor = vec3(0.05, 0.05, 0.08); // sombras do ambiente= 0.0 completamente escuro | 0.2 bem claro | 
+    vec3 ambient = Kd0 * ambientColor;
+
+    float lambert = max(0.0, dot(n, l));
+    vec3 diffuse = Kd0 * lambert * lightColor;
+
+    vec3 Ks = vec3(0.2);     // intesidade do reflexo - 0.0 fosco | 0.2 normal | 0.8 muito reflexo
+    float shininess = 32.0;  // concentração do brilho 1 (bizarro) - 256 ("molhado")
+    float spec = pow(max(0.0, dot(n, h)), shininess);
+    vec3 specular = Ks * spec * lightColor;
+
+    vec3 lighting = ambient + (diffuse + specular) * attenuation;
+
+    color.rgb = lighting;
+    color.a = 1.0;
+
+    color.rgb = pow(color.rgb, vec3(1.0,1.0,1.0)/2.2);
+
+
+    /*
     // Equação de Iluminação
     float lambert = max(0,dot(n,l));
 
@@ -262,5 +295,7 @@ void main()
     // Cor final com correção gamma, considerando monitor sRGB.
     // Veja https://en.wikipedia.org/w/index.php?title=Gamma_correction&oldid=751281772#Windows.2C_Mac.2C_sRGB_and_TV.2Fvideo_standard_gammas
     color.rgb = pow(color.rgb, vec3(1.0,1.0,1.0)/2.2);
+    */
+    
 } 
 

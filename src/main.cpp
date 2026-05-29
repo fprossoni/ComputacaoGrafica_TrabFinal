@@ -235,13 +235,16 @@ GLuint g_NumLoadedTextures = 0;
 #define COR_B 0.863f
 #define COR_A 0.8f
 
-#define SPEED 0.05f
+#define SPEED 0.02f
 
 bool g_W_Pressed = false;
 bool g_A_Pressed = false;
 bool g_S_Pressed = false;
 bool g_D_Pressed = false;
 bool g_SPACE_Pressed =false;
+
+glm::vec3 g_LightPos   = glm::vec3(0.0f, 2.5f, 0.0f);  // posicao luz
+glm::vec3 g_LightColor = glm::vec3(1.0f, 0.98f, 0.90f); // cor da luz
 
 glm::vec4 g_CameraPos = glm::vec4(0.0f, 0.5f, 0.0f, 1.0f);
 void UpdatePlayerPosition(glm::vec4 view_vector, glm::vec4 up)
@@ -422,7 +425,16 @@ int main(int argc, char* argv[])
         float x = r*cos(g_CameraPhi)*sin(g_CameraTheta);
         */
 
-        
+        GLint lightPosLoc = glGetUniformLocation(g_GpuProgramID, "lightPos");
+        GLint viewPosLoc = glGetUniformLocation(g_GpuProgramID, "viewPos");
+        GLint lightColorLoc = glGetUniformLocation(g_GpuProgramID, "lightColor");
+
+        glm::vec3 cameraPosVec3 = glm::vec3(g_CameraPos.x, g_CameraPos.y, g_CameraPos.z);
+
+        glUniform3fv(lightPosLoc, 1, &g_LightPos[0]);
+        glUniform3fv(viewPosLoc, 1, &cameraPosVec3[0]);
+        glUniform3fv(lightColorLoc, 1, &g_LightColor[0]);
+
         glm::vec4 view_vector = glm::vec4(cos(g_CameraPhi) * sin(g_CameraTheta),
         sin(g_CameraPhi),
         cos(g_CameraPhi) * cos(g_CameraTheta),
@@ -438,6 +450,8 @@ int main(int argc, char* argv[])
         }
 
         glm::mat4 view = Matrix_Camera_View(g_CameraPos, view_vector, up);
+
+        
 
         // Abaixo definimos as varáveis que efetivamente definem a câmera virtual.
         // Veja slides 195-227 e 229-234 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
