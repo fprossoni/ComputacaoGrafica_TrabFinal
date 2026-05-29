@@ -13,3 +13,5 @@ https://polyhaven.com/a/rubber_duck_toy
 
 OUTROS
 https://learnopengl.com/Getting-started/Camera
+https://learnopengl.com/Advanced-Lighting/Advanced-Lighting
+https://www.youtube.com/watch?v=-NSBP5q8nNE
