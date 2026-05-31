@@ -43,6 +43,10 @@ uniform mat4 projection;
 #define METAL_BARREL 17
 #define WET_FLOOR_SIGN 18
 #define WOOD_CUBE 19
+#define INDUSTRIAL_LAMP 20
+#define INDUSTRIAL_LAMP_COVER 21
+#define CHESS_BLACK_PIECE 22
+#define CARPET 23
 
 
 uniform int object_id;
@@ -70,6 +74,18 @@ uniform sampler2D TextureImage14;
 uniform sampler2D TextureImage15;
 uniform sampler2D TextureImage16;
 uniform sampler2D TextureImage17;
+uniform sampler2D TextureImage18;
+uniform sampler2D TextureImage19;
+uniform sampler2D TextureImage20;
+uniform sampler2D TextureImage21;
+uniform sampler2D TextureImage22;
+uniform sampler2D TextureImage23;
+uniform sampler2D TextureImage24;
+uniform sampler2D TextureImage25;
+uniform sampler2D TextureImage26;
+uniform sampler2D TextureImage27;
+uniform sampler2D TextureImage28;
+uniform sampler2D TextureImage29;
 
 
 // O valor de saída ("out") de um Fragment Shader é a cor final do fragmento.
@@ -186,7 +202,17 @@ void main()
 
     else if ( object_id == METAL_CEILING)
     {
-        Kd0 = vec3(0.87, 0.87, 0.87);
+        // Coordenadas de textura do plano, obtidas do arquivo OBJ.
+        float U = texcoords.x * 5;
+        float V = texcoords.y * 5;
+        
+		// Obtemos a refletância difusa a partir da leitura da imagem TextureImage1
+		vec3 texture = texture(TextureImage19, vec2(U,V)).rgb;
+        vec3 texture_color = vec3(1.0);
+
+        // 0.0 = só textura
+        // 1.0 = só cor
+        Kd0 = mix(texture, texture_color, 0.6);
     }
 
     else if ( object_id == CEILING_FAN )
@@ -209,6 +235,16 @@ void main()
 
 		// Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
 		Kd0 = texture(TextureImage2, vec2(U,V)).rgb;
+    }
+
+    else if ( object_id == CHESS_BLACK_PIECE )
+    {
+
+        float U = texcoords.x;
+        float V = texcoords.y; 
+
+		// Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
+		Kd0 = texture(TextureImage20, vec2(U,V)).rgb;
     }
 
     else if ( object_id == RUBBER_DUCK )
@@ -314,6 +350,36 @@ void main()
 
 		// Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
 		Kd0 = texture(TextureImage16, vec2(U,V)).rgb;
+    }
+
+    else if ( object_id == INDUSTRIAL_LAMP )
+    {
+
+        float U = texcoords.x;
+        float V = texcoords.y; 
+
+		// Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
+		Kd0 = texture(TextureImage17, vec2(U,V)).rgb;
+    }
+
+    else if ( object_id == INDUSTRIAL_LAMP_COVER )
+    {
+
+        float U = texcoords.x;
+        float V = texcoords.y; 
+
+		// Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
+		Kd0 = texture(TextureImage18, vec2(U,V)).rgb;
+    }
+
+    else if ( object_id == CARPET )
+    {
+
+        float U = texcoords.x;
+        float V = texcoords.y; 
+
+		// Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
+		Kd0 = texture(TextureImage21, vec2(U,V)).rgb;
     }
     
     vec3 fragPosVec3 = position_world.xyz;
