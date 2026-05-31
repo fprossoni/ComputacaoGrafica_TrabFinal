@@ -235,7 +235,7 @@ GLuint g_NumLoadedTextures = 0;
 #define COR_B 0.863f
 #define COR_A 0.8f
 
-#define SPEED 0.02f
+#define SPEED 0.01f
 
 bool g_W_Pressed = false;
 bool g_A_Pressed = false;
@@ -342,12 +342,20 @@ int main(int argc, char* argv[])
     LoadTextureImage("../../data/red_brick_diff_1k.jpg");      // TextureImage0
     LoadTextureImage("../../data/rocky_terrain_02_diff_1k.jpg"); // TextureImage1
     LoadTextureImage("../../data/textures/chess_set_pieces_white_diff_1k.jpg"); // TextureImage2
-    LoadTextureImage("../../data/textures/velour_velvet_diff_1k.jpg"); // TextureImage3
+    LoadTextureImage("../../data/textures/ornate_mirror_01_diff_2k.jpg"); // TextureImage3
     LoadTextureImage("../../data/textures/metal_plate_diff_2k.jpg"); // TextureImage4
     LoadTextureImage("../../data/textures/rubber_duck_toy_diff_4k.jpg"); // TextureImage5
     LoadTextureImage("../../data/textures/box_profile_metal_sheet_diff_2k.jpg"); // TextureImage6
     LoadTextureImage("../../data/textures/Poliigon_MetalPaintedMatte_7037_BaseColor.jpg"); // TextureImage7 
     LoadTextureImage("../../data/textures/ceiling_fan_diff_1k.jpg"); // TextureImage8
+    LoadTextureImage("../../data/textures/concrete_cat_statue_diff_1k.jpg"); // TextureImage9
+    LoadTextureImage("../../data/textures/DefaultMaterial_albedo.jpg"); // TextureImage10
+    LoadTextureImage("../../data/textures/wooden_table_02_diff_2k.jpg"); // TextureImage11
+    LoadTextureImage("../../data/textures/SchoolChair_01_diff_2k.jpg"); // TextureImage12
+    LoadTextureImage("../../data/textures/security_camera_02_diff_1k.jpg"); // TextureImage13
+    LoadTextureImage("../../data/textures/barrel_03_diff_2k.jpg"); // TextureImage14
+    LoadTextureImage("../../data/textures/WetFloorSign_01_diff_2k.jpg"); // TextureImage15
+    LoadTextureImage("../../data/textures/Wooden_Toy_BaseColor.tga"); // TextureImage16
 
     // Construímos a representação de objetos geométricos através de malhas de triângulos
     ObjModel spheremodel("../../data/sphere.obj");
@@ -373,6 +381,44 @@ int main(int argc, char* argv[])
     ObjModel ceiling_fan("../../data/ceiling_fan_1k.obj");
     ComputeNormals(&ceiling_fan);
     BuildTrianglesAndAddToVirtualScene(&ceiling_fan);
+
+    ObjModel cat_statue("../../data/concrete_cat_statue_1k.obj");
+    ComputeNormals(&cat_statue);
+    BuildTrianglesAndAddToVirtualScene(&cat_statue);
+
+    ObjModel fire_extinguisher("../../data/FireExt.obj");
+    ComputeNormals(&fire_extinguisher);
+    BuildTrianglesAndAddToVirtualScene(&fire_extinguisher);
+
+    ObjModel wood_table("../../data/wooden_table_02_2k.obj");
+    ComputeNormals(&wood_table);
+    BuildTrianglesAndAddToVirtualScene(&wood_table);
+
+    ObjModel ornate_mirror("../../data/ornate_mirror_01_2k.obj");
+    ComputeNormals(&ornate_mirror);
+    BuildTrianglesAndAddToVirtualScene(&ornate_mirror);
+
+    ObjModel school_chair("../../data/SchoolChair_01_2k.obj");
+    ComputeNormals(&school_chair);
+    BuildTrianglesAndAddToVirtualScene(&school_chair);
+
+    ObjModel security_camera("../../data/security_camera_02_1k.obj");
+    ComputeNormals(&security_camera);
+    BuildTrianglesAndAddToVirtualScene(&security_camera);
+
+    ObjModel metal_barrel("../../data/barrel_03_2k.obj");
+    ComputeNormals(&metal_barrel);
+    BuildTrianglesAndAddToVirtualScene(&metal_barrel);
+
+    ObjModel wet_floor_sign("../../data/WetFloorSign_01_2k.obj");
+    ComputeNormals(&wet_floor_sign);
+    BuildTrianglesAndAddToVirtualScene(&wet_floor_sign);
+
+    ObjModel wood_cube("../../data/wood_cubes.obj");
+    ComputeNormals(&wood_cube);
+    BuildTrianglesAndAddToVirtualScene(&wood_cube);
+
+    
 
 
     if ( argc > 1 )
@@ -505,9 +551,18 @@ int main(int argc, char* argv[])
         #define METAL_FLOOR 5
         #define RUBBER_DUCK 6
         #define METAL_WALL 7
-        #define METAL_WALL_2 10
         #define METAL_CEILING 8
         #define CEILING_FAN 9
+        #define METAL_WALL_2 10
+        #define CAT_STATUE 11
+        #define FIRE_EXTINGUISHER 12
+        #define WOOD_TABLE 13
+        #define ORNATE_MIRROR 14
+        #define SCHOOL_CHAIR 15
+        #define SECURITY_CAMERA 16
+        #define METAL_BARREL 17
+        #define WET_FLOOR_SIGN 18
+        #define WOOD_CUBE 19
 
         // Desenhamos pecas de xadrez
         model = Matrix_Translate(0.0f,0.001f,0.0f)
@@ -530,13 +585,13 @@ int main(int argc, char* argv[])
         glUniform1i(g_object_id_uniform, PLANE);
         DrawVirtualObject("the_plane");
 
-        model = Matrix_Translate(-1.0f,0.001f,-1.0f) 
+        model = Matrix_Translate(-1.5f,0.0f,-1.0f)  // PATO NORMAL
                 * Matrix_Scale(1.0f, 1.0f, 1.0f);
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, RUBBER_DUCK);
         DrawVirtualObject("rubber_duck_toy");
 
-        model = Matrix_Translate(-2.0f,0.001f,-1.0f) 
+        model = Matrix_Translate(-2.0f,0.0f,-1.0f) //PATO AMASSADO
                 * Matrix_Scale(2.0f, 0.1f, 2.0f);
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, RUBBER_DUCK);
@@ -616,12 +671,75 @@ int main(int argc, char* argv[])
         DrawVirtualObject("ceiling_fan");
         DrawVirtualObject("ceiling_fan_blades");
 
+        model = Matrix_Translate(1.0f,0.2f,0.0f)
+              * Matrix_Scale(1.0f, 1.0f, 1.0f);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, CAT_STATUE);
+        DrawVirtualObject("concrete_cat_statue");
+
+        model = Matrix_Translate(1.0f,0.2f,0.37f)
+              * Matrix_Scale(0.00035f, 0.00035f, 0.00035f);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, FIRE_EXTINGUISHER);
+        DrawVirtualObject("fire_extinguisher");
+
+        model = Matrix_Translate(1.0f,0.0f,0.8f)
+              * Matrix_Scale(0.35f, 0.35f, 0.35f);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, WOOD_TABLE);
+        DrawVirtualObject("wooden_table_02");
+
+        model = Matrix_Translate(1.0f,0.5f,1.1f)
+              * Matrix_Scale(0.6f, 0.6f, 0.6f);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, ORNATE_MIRROR);
+        DrawVirtualObject("ornate_mirror_01");
+
+        model = Matrix_Translate(1.0f,0.0f,1.5f)
+              * Matrix_Scale(0.4f, 0.4f, 0.4f);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SCHOOL_CHAIR);
+        DrawVirtualObject("SchoolChair_01");
+
+        model = Matrix_Translate(-0.5f,0.5f,-1.0f) // SUPORTE DA CAMERA
+              * Matrix_Scale(0.6f, 0.6f,0.6f);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SECURITY_CAMERA);
+        DrawVirtualObject("security_camera_mount");
+        
+        model = Matrix_Translate(-0.5f,0.5f,-1.0f) //CAMERA E LENTE OLHANDO LEVEMENT PARA BAIXO
+        * Matrix_Rotate(0.2f, glm::vec4(1.0f, 0.0f, 0.0f, 0.0f))
+        * Matrix_Scale(0.6f, 0.6f,0.6f);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SECURITY_CAMERA);
+        DrawVirtualObject("security_camera");
+        DrawVirtualObject("security_camera_lens");
+        
+        model = Matrix_Translate(-1.0f,0.0f,-1.0f)
+              * Matrix_Scale(0.42f, 0.42f,0.42f);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, METAL_BARREL);
+        DrawVirtualObject("barrel_03");
+
+        model = Matrix_Translate(1.0f,0.0f,-0.4f)
+              * Matrix_Scale(0.5f, 0.5f,0.5f);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, WET_FLOOR_SIGN);
+        DrawVirtualObject("WetFloorSign_01");
+
+        model = Matrix_Translate(-2.5f,0.0f,-1.0f)
+              * Matrix_Scale(1.0f, 1.0f,1.0f);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, WOOD_CUBE);
+        DrawVirtualObject("Text_A_.001_Cube.005"); // CUBO COM LETRA A (procurar no obj diferentes se precisar)
+
+
 
 
         // Imprimimos na tela os ângulos de Euler que controlam a rotação do
         // terceiro cubo.
         TextRendering_ShowEulerAngles(window);
-
+        
         // Imprimimos na informação sobre a matriz de projeção sendo utilizada.
         TextRendering_ShowProjection(window);
 
@@ -791,6 +909,14 @@ void LoadShadersFromFiles()
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage6"), 6);
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage7"), 7);
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage8"), 8);
+    glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage9"), 9);
+    glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage10"), 10);
+    glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage11"), 11);
+    glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage12"), 12);
+    glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage13"), 13);
+    glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage14"), 14);
+    glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage15"), 15);
+    glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage16"), 16);
     glUseProgram(0);
 }
 

@@ -34,6 +34,17 @@ uniform mat4 projection;
 #define METAL_CEILING 8
 #define CEILING_FAN 9
 #define METAL_WALL_2 10
+#define CAT_STATUE 11
+#define FIRE_EXTINGUISHER 12
+#define WOOD_TABLE 13
+#define ORNATE_MIRROR 14
+#define SCHOOL_CHAIR 15
+#define SECURITY_CAMERA 16
+#define METAL_BARREL 17
+#define WET_FLOOR_SIGN 18
+#define WOOD_CUBE 19
+
+
 uniform int object_id;
 
 // Parâmetros da axis-aligned bounding box (AABB) do modelo
@@ -50,6 +61,15 @@ uniform sampler2D TextureImage5;
 uniform sampler2D TextureImage6;
 uniform sampler2D TextureImage7;
 uniform sampler2D TextureImage8;
+uniform sampler2D TextureImage9;
+uniform sampler2D TextureImage10;
+uniform sampler2D TextureImage11;
+uniform sampler2D TextureImage12;
+uniform sampler2D TextureImage13;
+uniform sampler2D TextureImage14;
+uniform sampler2D TextureImage15;
+uniform sampler2D TextureImage16;
+uniform sampler2D TextureImage17;
 
 
 // O valor de saída ("out") de um Fragment Shader é a cor final do fragmento.
@@ -166,33 +186,11 @@ void main()
 
     else if ( object_id == METAL_CEILING)
     {
-        // Coordenadas de textura do plano, obtidas do arquivo OBJ.
-        U = texcoords.x * 3;
-        V = texcoords.y * 3;
-        //Kd0 = texture(TextureImage7, vec2(U,V)).rgb;
-
-        
-		// Obtemos a refletância difusa a partir da leitura da imagem TextureImage1
-		vec3 texture = texture(TextureImage6, vec2(U,V)).rgb;
-        vec3 texture_color = vec3(0.87, 0.87, 0.87);
-
-        // 0.0 = só textura
-        // 1.0 = só cor
-        Kd0 = mix(texture, texture_color, 1);
-        
-
+        Kd0 = vec3(0.87, 0.87, 0.87);
     }
 
     else if ( object_id == CEILING_FAN )
     {
-        // PREENCHA AQUI as coordenadas de textura do coelho, computadas com
-        // projeção planar XY em COORDENADAS DO MODELO. Utilize como referência
-        // o slides 99-104 do documento Aula_20_Mapeamento_de_Texturas.pdf,
-        // e também use as variáveis min*/max* definidas abaixo para normalizar
-        // as coordenadas de textura U e V dentro do intervalo [0,1]. Para
-        // tanto, veja por exemplo o mapeamento da variável 'p_v' utilizando
-        // 'h' no slides 158-160 do documento Aula_20_Mapeamento_de_Texturas.pdf.
-        // Veja também a Questão 4 do Questionário 4 no Moodle.
 
         float U = texcoords.x;
         float V = texcoords.y; 
@@ -205,14 +203,6 @@ void main()
     
     else if ( object_id == CHESS_WHITE_PIECE )
     {
-        // PREENCHA AQUI as coordenadas de textura do coelho, computadas com
-        // projeção planar XY em COORDENADAS DO MODELO. Utilize como referência
-        // o slides 99-104 do documento Aula_20_Mapeamento_de_Texturas.pdf,
-        // e também use as variáveis min*/max* definidas abaixo para normalizar
-        // as coordenadas de textura U e V dentro do intervalo [0,1]. Para
-        // tanto, veja por exemplo o mapeamento da variável 'p_v' utilizando
-        // 'h' no slides 158-160 do documento Aula_20_Mapeamento_de_Texturas.pdf.
-        // Veja também a Questão 4 do Questionário 4 no Moodle.
 
         float U = texcoords.x;
         float V = texcoords.y; 
@@ -223,20 +213,107 @@ void main()
 
     else if ( object_id == RUBBER_DUCK )
     {
-        // PREENCHA AQUI as coordenadas de textura do coelho, computadas com
-        // projeção planar XY em COORDENADAS DO MODELO. Utilize como referência
-        // o slides 99-104 do documento Aula_20_Mapeamento_de_Texturas.pdf,
-        // e também use as variáveis min*/max* definidas abaixo para normalizar
-        // as coordenadas de textura U e V dentro do intervalo [0,1]. Para
-        // tanto, veja por exemplo o mapeamento da variável 'p_v' utilizando
-        // 'h' no slides 158-160 do documento Aula_20_Mapeamento_de_Texturas.pdf.
-        // Veja também a Questão 4 do Questionário 4 no Moodle.
-
+    
         float U = texcoords.x;
         float V = texcoords.y; 
 
 		// Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
 		Kd0 = texture(TextureImage5, vec2(U,V)).rgb;
+    }
+
+    else if ( object_id == CAT_STATUE )
+    {
+        // Coordenadas de textura do plano, obtidas do arquivo OBJ.
+        float U = texcoords.x;
+        float V = texcoords.y;
+        
+		// Obtemos a refletância difusa a partir da leitura da imagem TextureImage1
+		vec3 texture = texture(TextureImage9, vec2(U,V)).rgb;
+        vec3 texture_color = vec3(0.0);
+
+        // 0.0 = só textura
+        // 1.0 = só cor
+        Kd0 = mix(texture, texture_color, 0.9);
+    }
+
+    else if ( object_id == FIRE_EXTINGUISHER )
+    {
+    
+        float U = texcoords.x;
+        float V = texcoords.y; 
+
+		// Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
+		Kd0 = texture(TextureImage10, vec2(U,V)).rgb;
+    }
+
+    else if ( object_id == WOOD_TABLE )
+    {
+    
+        float U = texcoords.x;
+        float V = texcoords.y; 
+
+		// Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
+		Kd0 = texture(TextureImage11, vec2(U,V)).rgb;
+    }
+
+    else if ( object_id == ORNATE_MIRROR )
+    {
+    
+        float U = texcoords.x;
+        float V = texcoords.y; 
+
+		// Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
+		Kd0 = texture(TextureImage3, vec2(U,V)).rgb;
+    }
+
+    else if ( object_id == SCHOOL_CHAIR )
+    {
+    
+        float U = texcoords.x;
+        float V = texcoords.y; 
+
+		// Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
+		Kd0 = texture(TextureImage12, vec2(U,V)).rgb;
+    }
+
+    else if ( object_id == SECURITY_CAMERA )
+    {
+    
+        float U = texcoords.x;
+        float V = texcoords.y; 
+
+		// Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
+		Kd0 = texture(TextureImage13, vec2(U,V)).rgb;
+    }
+
+    else if ( object_id == METAL_BARREL )
+    {
+    
+        float U = texcoords.x;
+        float V = texcoords.y; 
+
+		// Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
+		Kd0 = texture(TextureImage14, vec2(U,V)).rgb;
+    }
+
+    else if ( object_id == WET_FLOOR_SIGN )
+    {
+    
+        float U = texcoords.x;
+        float V = texcoords.y; 
+
+		// Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
+		Kd0 = texture(TextureImage15, vec2(U,V)).rgb;
+    }
+
+    else if ( object_id == WOOD_CUBE )
+    {
+    
+        float U = texcoords.x;
+        float V = texcoords.y; 
+
+		// Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
+		Kd0 = texture(TextureImage16, vec2(U,V)).rgb;
     }
     
     vec3 fragPosVec3 = position_world.xyz;
