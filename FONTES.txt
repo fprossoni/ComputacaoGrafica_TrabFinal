@@ -9,7 +9,15 @@ https://www.poliigon.com/texture/matte-metal-texture-black/7037
 OBJETOS
 https://polyhaven.com/a/chess_set
 https://polyhaven.com/a/rubber_duck_toy
-
+https://polyhaven.com/a/concrete_cat_statue
+https://polyhaven.com/a/wooden_table_02
+https://polyhaven.com/a/SchoolChair_01
+https://polyhaven.com/a/security_camera_02
+https://polyhaven.com/a/barrel_03
+https://polyhaven.com/a/WetFloorSign_01
+https://www.turbosquid.com/3d-models/fire-extinguisher-low-poly-1109565
+https://polyhaven.com/a/ornate_mirror_01
+https://www.cgtrader.com/free-3d-models/interior/other/alphabet-blocks-gameready
 
 OUTROS
 https://learnopengl.com/Getting-started/Camera
