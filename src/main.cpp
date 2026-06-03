@@ -169,15 +169,15 @@ struct SceneObject
 
 struct InteractiveObject {
     std::string scene_name; // nome do objeto ex: "rubber_duck_toy"
-    int object_id;          // ID do shader (numero em define ex: RUBBER_DUCK)
-    glm::vec3 position;     // posicao no mundo
-    glm::vec3 scale;        // escala no mundo
+    int object_id; // ID do shader (numero em define, ex: RUBBER_DUCK)
+    glm::vec3 position; // posicao no mundo
+    glm::vec3 scale; // escala no mundo
 
     glm::vec3 scale_when_picked; // tamanho inicial do objeto
 };
 
 // Vetor global para listar os objetos dinamicos da sala
-std::vector<InteractiveObject> g_MovableObjects;
+std::vector<InteractiveObject> g_InteractiveObjects;
 
 // Abaixo definimos variáveis globais utilizadas em várias funções do código.
 
@@ -201,6 +201,7 @@ float g_AngleZ = 0.0f;
 // "g_LeftMouseButtonPressed = true" se o usuário está com o botão esquerdo do mouse
 // pressionado no momento atual. Veja função MouseButtonCallback().
 bool g_LeftMouseButtonPressed = false;
+bool g_LeftMouseClick = false;
 bool g_RightMouseButtonPressed = false; // Análogo para botão direito do mouse
 bool g_MiddleMouseButtonPressed = false; // Análogo para botão do meio do mouse
 
@@ -267,6 +268,7 @@ GLuint g_NumLoadedTextures = 0;
 #define INDUSTRIAL_LAMP_COVER 21
 #define CHESS_BLACK_PIECE 22
 #define CARPET 23
+#define DOOR_FRAME 24
 
 #define COR_R 0.196f
 #define COR_G 0.471f
@@ -274,8 +276,9 @@ GLuint g_NumLoadedTextures = 0;
 #define COR_A 0.8f
 
 #define SPEED 0.035f
-#define LENTIDAO_CAMINHADA 10
+#define LENTIDAO_CAMINHADA 50
 #define SENSIBILIDADE 0.001f
+#define FLOATING_SPEED 0.01f
 
 bool g_W_Pressed = false;
 bool g_A_Pressed = false;
@@ -290,19 +293,18 @@ bool g_RIGHT_Pressed = false;
 bool g_SPACE_Pressed =false;
 bool g_SHIFT_Pressed =false;
 
-glm::vec3 g_LightPos   = glm::vec3(0.0f, 2.6f, 0.0f);  // posicao luz
-glm::vec3 g_LightColor = glm::vec3(1.0f, 0.98f, 0.90f); // cor da luz
-
-// POSICAO INICIAL DO JOGADOR
-//glm::vec4 g_CameraPos = glm::vec4(4.6f, 0.5f, 4.6f, 1.0f);
-
-// POSICAO centro do mundo
-glm::vec4 g_CameraPos = glm::vec4(0.0f, 0.5f, 0.0f, 1.0f);
-
 bool g_IsHoldingObject = false;
 int g_HeldObjectIndex = -1;
 float g_PickDistance = 2.0f;
 
+glm::vec3 g_LightPos   = glm::vec3(0.0f, 2.6f, 0.0f);  // posicao luz
+glm::vec3 g_LightColor = glm::vec3(1.0f, 0.98f, 0.90f); // cor da luz
+
+// POSICAO INICIAL DO JOGADOR
+glm::vec4 g_CameraPos = glm::vec4(4.6f, 0.5f, 4.6f, 1.0f);
+
+// POSICAO centro do mundo
+//glm::vec4 g_CameraPos = glm::vec4(0.0f, 0.5f, 0.0f, 1.0f);
 
 void UpdatePlayerPosition(glm::vec4 view_vector, glm::vec4 up)
 {
@@ -321,30 +323,35 @@ void UpdatePlayerPosition(glm::vec4 view_vector, glm::vec4 up)
     if (g_LEFT_Pressed) g_CameraPos += side * (speed / LENTIDAO_CAMINHADA);
     if (g_RIGHT_Pressed) g_CameraPos -= side * (speed / LENTIDAO_CAMINHADA);
 
-    if (g_SPACE_Pressed) g_CameraPos.y += 0.005f;
-    if (g_SHIFT_Pressed) g_CameraPos.y -= 0.005f;
+    if (g_SPACE_Pressed) g_CameraPos.y += FLOATING_SPEED;
+    if (g_SHIFT_Pressed) g_CameraPos.y -= FLOATING_SPEED;
 }
 
 float RaycastSceneDistance(glm::vec3 ray_origin, glm::vec3 ray_direction) {
-    float t_min = 0.001f;
-    float t_max = 10000.0f;
+    float ray_min = 0.001f;
+    float ray_max = 10000.0f;
 
     glm::vec3 room_min = glm::vec3(-5.0f, 0.0f, -5.0f);
     glm::vec3 room_max = glm::vec3(5.0f, 3.0f, 5.0f);
 
     for (int i = 0; i < 3; ++i) {
-        if (std::abs(ray_direction[i]) > 1e-6f) {
-            float ood = 1.0f / ray_direction[i];
-            float t1 = (room_min[i] - ray_origin[i]) * ood;
-            float t2 = (room_max[i] - ray_origin[i]) * ood;
-            if (t1 > t2) std::swap(t1, t2);
-            if (t1 > t_min) t_min = t1;
-            if (t2 < t_max) t_max = t2;
-            if (t_min > t_max) return -1.0f;
+        if (std::abs(ray_direction[i]) > 0.000001f) {
+
+            float direction = 1.0f / ray_direction[i];
+            float min_wall = (room_min[i] - ray_origin[i]) * direction;
+            float max_wall = (room_max[i] - ray_origin[i]) * direction;
+
+            if (min_wall > max_wall) std::swap(min_wall, max_wall);
+            if (min_wall > ray_min) ray_min = min_wall;
+            if (max_wall < ray_max) ray_max = max_wall;
+
+            if (ray_min > ray_max) 
+                return -1.0f;
+
         }
     }
 
-    return t_max; 
+    return ray_max; 
 }
 
 int main(int argc, char* argv[])
@@ -447,6 +454,7 @@ int main(int argc, char* argv[])
     LoadTextureImage("../../data/textures/interior_tiles_diff_1k.jpg"); // TextureImage19
     LoadTextureImage("../../data/textures/chess_set_pieces_black_diff_1k.jpg"); // TextureImage20
     LoadTextureImage("../../data/textures/_02_-_Default.jpg"); // TextureImage21
+    LoadTextureImage("../../data/textures/plastered_wall_05_diff_1k.jpg"); // TextureImage22
 
     // Construímos a representação de objetos geométricos através de malhas de triângulos
     ObjModel spheremodel("../../data/sphere.obj");
@@ -517,16 +525,23 @@ int main(int argc, char* argv[])
     ComputeNormals(&carpet);
     BuildTrianglesAndAddToVirtualScene(&carpet);
 
-    // Instanciar objeto dinamicod
-    InteractiveObject duck;
-    duck.scene_name = "rubber_duck_toy";
-    duck.object_id = RUBBER_DUCK;
-    duck.position = glm::vec3(-1.5f, 0.0f, -1.0f); // Posiçcao inicial antiga
-    duck.scale = glm::vec3(1.0f, 1.0f, 1.0f);
-    duck.scale_when_picked = duck.scale;
+    ObjModel door_frame("../../data/door_frame.obj");
+    ComputeNormals(&door_frame);
+    BuildTrianglesAndAddToVirtualScene(&door_frame);
 
-    g_MovableObjects.push_back(duck);
+    /*============================================================================================
+        OBJETOS INTERATIVOS
+    ============================================================================================*/
 
+    // Instancias iniciais de objetos dinamicos
+        InteractiveObject duck;
+        duck.scene_name = "rubber_duck_toy";
+        duck.object_id = RUBBER_DUCK;
+        duck.position = glm::vec3(-1.5f, 0.0f, -1.0f); // Posiçcao inicial antiga
+        duck.scale = glm::vec3(1.0f, 1.0f, 1.0f);
+        duck.scale_when_picked = duck.scale;
+
+        g_InteractiveObjects.push_back(duck);
 
     if ( argc > 1 )
     {
@@ -613,43 +628,56 @@ int main(int argc, char* argv[])
         glm::vec3 cPos = glm::vec3(g_CameraPos.x, g_CameraPos.y, g_CameraPos.z);
         glm::vec3 vDir = glm::normalize(glm::vec3(view_vector.x, view_vector.y, view_vector.z));
 
-        // 1. LÓGICA DE PEGAR
-        if (g_LeftMouseButtonPressed && !g_IsHoldingObject) {
+        // Detecta o exato frame em que o botão esquerdo foi CLICADO (e não segurado)
+        bool mouseClickedThisFrame = g_LeftMouseButtonPressed && !g_LeftMouseClick;
+        g_LeftMouseClick = g_LeftMouseButtonPressed; // Atualiza para o próximo frame
 
-            for (size_t i = 0; i < g_MovableObjects.size(); ++i) {
-                glm::vec3 toObject = g_MovableObjects[i].position - cPos;
-                float projection = glm::dot(toObject, vDir);
-                glm::vec3 closestPoint = cPos + vDir * projection;
-                float distanceToRay = glm::distance(g_MovableObjects[i].position, closestPoint);
+        if (mouseClickedThisFrame) {
+            if (!g_IsHoldingObject) {
+                // tentar pegar objeto
+                for (size_t i = 0; i < g_InteractiveObjects.size(); ++i) {
+                    glm::vec3 toObject = g_InteractiveObjects[i].position - cPos;
+                    float projection = glm::dot(toObject, vDir);
+                    glm::vec3 closestPoint = cPos + vDir * projection;
+                    float distanceToRay = glm::distance(g_InteractiveObjects[i].position, closestPoint);
 
-                if (distanceToRay < 0.5f && glm::length(toObject) < 5.0f) { 
-                    g_IsHoldingObject = true;
-                    g_HeldObjectIndex = i;
-                    g_MovableObjects[i].scale_when_picked = g_MovableObjects[i].scale;
-                    break;
+                    // se raio apssar perto do centro dod objeto
+                    if (distanceToRay < 0.6f && glm::length(toObject) < 6.0f) { 
+                        g_IsHoldingObject = true;
+                        g_HeldObjectIndex = i;
+                        
+                        // distancia atual
+                        g_PickDistance = glm::length(toObject);
+                        // escala tual
+                        g_InteractiveObjects[i].scale_when_picked = g_InteractiveObjects[i].scale;
+                        break;
+                    }
                 }
-            }
-        }
-
-        // 2. LÓGICA DE SEGURAR 
-        if (g_IsHoldingObject && g_HeldObjectIndex != -1) {
-
-            if (!g_LeftMouseButtonPressed) {
-                g_IsHoldingObject = false;
-                g_HeldObjectIndex = -1;
             } 
             else {
+                // calculo de novo tamanho
                 float hit_distance = RaycastSceneDistance(cPos, vDir);
                 
                 if (hit_distance > 0.1f) {
-                    InteractiveObject& obj = g_MovableObjects[g_HeldObjectIndex];
+                    InteractiveObject& obj = g_InteractiveObjects[g_HeldObjectIndex];
                     
+                    // nova posicao onde objeto colidiu
                     obj.position = cPos + vDir * hit_distance;
                     
+                    //  novo tamanho do objeto
                     float scale_factor = hit_distance / g_PickDistance;
                     obj.scale = obj.scale_when_picked * scale_factor;
                 }
+                
+                g_IsHoldingObject = false;
+                g_HeldObjectIndex = -1;
             }
+        }
+
+        // Segurando
+        if (g_IsHoldingObject && g_HeldObjectIndex != -1) {
+            InteractiveObject& obj = g_InteractiveObjects[g_HeldObjectIndex];
+            obj.position = cPos + vDir * g_PickDistance;
         }
 
         
@@ -698,33 +726,56 @@ int main(int argc, char* argv[])
         glUniformMatrix4fv(g_view_uniform       , 1 , GL_FALSE , glm::value_ptr(view));
         glUniformMatrix4fv(g_projection_uniform , 1 , GL_FALSE , glm::value_ptr(projection));
 
-        /*============================================================================================
+
+        /*===============
         OBJETOS DO MUNDO
+        =================*/
+        
+        /*============================================================================================
+        OBJETOS INTERATIVOS
+        ============================================================================================*/
+
+        for (size_t i = 0; i < g_InteractiveObjects.size(); ++i) {
+            InteractiveObject& obj = g_InteractiveObjects[i];
+
+            model = Matrix_Translate(obj.position.x, obj.position.y, obj.position.z)
+                * Matrix_Scale(obj.scale.x, obj.scale.y, obj.scale.z);
+            glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+            glUniform1i(g_object_id_uniform, obj.object_id);
+            DrawVirtualObject(obj.scene_name.c_str()); 
+        }
+
+        /*============================================================================================
+        OBJETOS DO INICIO
         ============================================================================================*/
         
         // Pecas de xadrez em cima da mesa de madeira
-        model = Matrix_Translate(3.93f,0.5f,4.4f)
-        * Matrix_Scale(1.0f, 1.0f, 1.0f)
-        * Matrix_Rotate(-PI/1.9, glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
-        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(g_object_id_uniform, CHESS_BLACK_PIECE);
-        DrawVirtualObject("piece_bishop_white_01"); //bispo
-        DrawVirtualObject("piece_bishop_filler_white_01"); //filler bispo
-        
+
+        //DAMA E REI BRANCOS
         model = Matrix_Translate(4.15f,0.26f,4.7f)
         * Matrix_Scale(1.0f, 1.0f, 1.0f)
         * Matrix_Rotate(PI/3, glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, CHESS_WHITE_PIECE);
-        DrawVirtualObject("piece_queen_white"); //dama
-        DrawVirtualObject("piece_king_white"); //rei
+        DrawVirtualObject("piece_queen_white"); 
+        DrawVirtualObject("piece_king_white");
         
+        // REI PRETO
         model = Matrix_Translate(4.2f,0.26f,4.5f)
         * Matrix_Scale(1.0f, 1.0f, 1.0f)
         * Matrix_Rotate(PI/2, glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, CHESS_BLACK_PIECE);
-        DrawVirtualObject("piece_king_white"); //rei
+        DrawVirtualObject("piece_king_white");
+        
+        //BISPO PRETO CAIDO
+        model = Matrix_Translate(3.93f,0.5f,4.4f)
+        * Matrix_Scale(1.0f, 1.0f, 1.0f)
+        * Matrix_Rotate(-PI/1.9, glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, CHESS_BLACK_PIECE);
+        DrawVirtualObject("piece_bishop_white_01");
+        DrawVirtualObject("piece_bishop_filler_white_01"); 
         
         //MESA DE MADEIRA
         model = Matrix_Translate(4.0f,0.0f,4.5f) 
@@ -734,13 +785,53 @@ int main(int argc, char* argv[])
         glUniform1i(g_object_id_uniform, WOOD_TABLE);
         DrawVirtualObject("wooden_table_02");
         
+
+        /*============================================================================================
+        OBJETOS DO CANTO DE SAIDA
+        ============================================================================================*/
+        
+        //CUBO F
+        model = Matrix_Translate(-3.75f,1.21f,-4.2f)
+        * Matrix_Scale(4.0f, 4.0f,4.0f);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, WOOD_CUBE);
+        DrawVirtualObject("Text_F_.001_Text.050"); // CUBO COM LETRA F (procurar no obj diferentes se precisar)
+        
+        //CUBO C
+        model = Matrix_Translate(-3.6f,0.0f,-4.2f)
+        * Matrix_Scale(5.0f, 5.0f,5.0f);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, WOOD_CUBE);
+        DrawVirtualObject("Text_C_.001_Text.047");
+        
+        //CUBO G
+        model = Matrix_Translate(-3.2f,0.0f,-4.6f)
+        * Matrix_Scale(1.0f, 1.0f,1.0f)
+        * Matrix_Rotate(-PI/4, glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, WOOD_CUBE);
+        DrawVirtualObject("Text_G_.001_Text.051");
+        
         //PATO AMASSADO
         model = Matrix_Translate(-4.4f,0.0f,-4.3f)
         * Matrix_Scale(4.0f, 0.1f, 4.0f);
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, RUBBER_DUCK);
-        DrawVirtualObject("rubber_duck_toy");
+        DrawVirtualObject("rubber_duck_toy"); 
+
+        //DOOR FRAME DE SAIDA
+        model = Matrix_Translate(-4.8f,1.70f,-5.11f)
+        * Matrix_Rotate(PI/2, glm::vec4(0.0f, 1.0f, 0.0f, 0.0f))
+        * Matrix_Scale(0.7f, 0.5f, 0.5f);
+         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+         glUniform1i(g_object_id_uniform, DOOR_FRAME);
+         DrawVirtualObject("door_frame"); 
         
+
+        /*============================================================================================
+        LAMPADA E CAMERAS
+        ============================================================================================*/
+
         // LAMPADA INDUSTRIAL DA SALA
         model = Matrix_Translate(0.0f,3.0f,0.0f)
         * Matrix_Scale(1.5f, 1.5f, 1.5f)
@@ -757,6 +848,47 @@ int main(int argc, char* argv[])
         glUniform1i(g_object_id_uniform, INDUSTRIAL_LAMP_COVER);
         DrawVirtualObject("industrial_lamp_glass");
         
+        // SUPORTE DA CAMERA 1
+        model = Matrix_Translate(-5.0f,2.5f,-3.2f) 
+        * Matrix_Rotate(PI/2, glm::vec4(0.0f, 1.0f, 0.0f, 0.0f))
+        * Matrix_Scale(0.7f, 0.7f,0.7f);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SECURITY_CAMERA);
+        DrawVirtualObject("security_camera_mount");
+        
+        //CAMERA E LENTE 1 OLHANDO LEVEMENTE PARA BAIXO
+        model = Matrix_Translate(-5.0f,2.5f,-3.2f)
+        * Matrix_Rotate(-0.2f, glm::vec4(0.0f, 0.0f, 1.0f, 0.0f))
+        * Matrix_Rotate(PI/2, glm::vec4(0.0f, 1.0f, 0.0f, 0.0f))
+        * Matrix_Scale(0.7f, 0.7f,0.7f);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SECURITY_CAMERA);
+        DrawVirtualObject("security_camera");
+        DrawVirtualObject("security_camera_lens");
+  
+        // SUPORTE DA CAMERA 2
+        model = Matrix_Translate(5.0f,2.5f,3.2f)
+        * Matrix_Rotate(-PI/2, glm::vec4(0.0f, 1.0f, 0.0f, 0.0f))
+        * Matrix_Scale(0.7f, 0.7f,0.7f);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SECURITY_CAMERA);
+        DrawVirtualObject("security_camera_mount");
+        
+        //CAMERA 2 E LENTE OLHANDO LEVEMENTE PARA BAIXO
+        model = Matrix_Translate(5.0f,2.5f,3.2f) 
+        * Matrix_Rotate(0.2f, glm::vec4(0.0f, 0.0f, 1.0f, 0.0f))
+        * Matrix_Rotate(-PI/2, glm::vec4(0.0f, 1.0f, 0.0f, 0.0f))
+        * Matrix_Scale(0.7f, 0.7f,0.7f);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SECURITY_CAMERA);
+        DrawVirtualObject("security_camera");
+        DrawVirtualObject("security_camera_lens");
+        
+        
+        /*============================================================================================
+        CADEIRAS
+        ============================================================================================*/
+
         //CADEIRAS CANTO +X  -Y
         #define NUM_CADEIRAS 10
         int laco;
@@ -786,37 +918,22 @@ int main(int argc, char* argv[])
   
           start_xpos += dist;
         }
-        
-        
-        /*
-        for (const auto& obj : g_MovableObjects) {
-            model = Matrix_Translate(obj.position.x, obj.position.y, obj.position.z)
-            * Matrix_Scale(obj.scale.x, obj.scale.y, obj.scale.z);
-            
-            glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-            glUniform1i(g_object_id_uniform, obj.object_id);
-            DrawVirtualObject(obj.scene_name.c_str());
-        }
-        
-        model = Matrix_Translate(-1.5f,0.0f,-1.0f)  // PATO NORMAL
-        * Matrix_Scale(1.0f, 1.0f, 1.0f);
-        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(g_object_id_uniform, RUBBER_DUCK);
-        DrawVirtualObject("rubber_duck_toy");
-        */
        
 
+        /*============================================================================================
+        TAPETE E BRINQUEDOS
+        ============================================================================================*/
 
-       // Desenhamos pecas de pe
+       // PEAO E TORRE BRANCOS DE PÉ
        model = Matrix_Translate(-1.3f,-0.10f,2.4f)
              * Matrix_Scale(6.0f, 6.0f, 6.0f)
              * Matrix_Rotate(PI/2.7, glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
        glUniform1i(g_object_id_uniform, CHESS_WHITE_PIECE);
-       DrawVirtualObject("piece_pawn_white_01"); //peao
-       DrawVirtualObject("piece_rook_white_01"); //TORRE
+       DrawVirtualObject("piece_pawn_white_01");
+       DrawVirtualObject("piece_rook_white_01");
 
-       // Desenhamos peca caída
+       // CAVALO BRANCO CAIDO
         model = Matrix_Translate(-1.55f,-0.45f,2.15f)
             * Matrix_Scale(5.0f, 5.0f, 5.0f)
             * Matrix_Rotate(PI/1.8, glm::vec4(0.0f, 0.0f, 1.0f, 0.0f))
@@ -824,60 +941,55 @@ int main(int argc, char* argv[])
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, CHESS_WHITE_PIECE);
         DrawVirtualObject("piece_knight_white_01");
-
-       model = Matrix_Translate(-1.8f,0.0f,2.0f)
-             * Matrix_Scale(3.0f, 0.5f, 3.0f);
-       glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-       glUniform1i(g_object_id_uniform, CARPET);
-       DrawVirtualObject("carpet");
+            
+        // TAPETE
+        model = Matrix_Translate(-1.8f,0.0f,2.0f)
+            * Matrix_Scale(3.0f, 0.5f, 3.0f);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, CARPET);
+        DrawVirtualObject("carpet");
+            
+        //CUBO A
+        model = Matrix_Translate(-2.12f,0.243f,2.55f)
+            * Matrix_Rotate(0.2f, glm::vec4(0.0f, 1.0f, 0.0f, 0.0f))
+            * Matrix_Scale(1.0f, 1.0f,1.0f);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, WOOD_CUBE);
+        DrawVirtualObject("Text_A_.001_Cube.005");
+        
+        //CUBO B
+        model = Matrix_Translate(-2.1f,0.0f,2.7f)
+            * Matrix_Rotate(0.2f, glm::vec4(0.0f, 1.0f, 0.0f, 0.0f))
+            * Matrix_Scale(1.0f, 1.0f,1.0f);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, WOOD_CUBE);
+        DrawVirtualObject("Text_B_.001_Text.046");
+    
+        //CUBO C
+        model = Matrix_Translate(-2.13f,0.0f,2.4f)
+            * Matrix_Rotate(0.2f, glm::vec4(0.0f, 1.0f, 0.0f, 0.0f))
+            * Matrix_Scale(1.0f, 1.0f,1.0f);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, WOOD_CUBE);
+        DrawVirtualObject("Text_C_.001_Text.047");
+    
+        //PATO DE BORRACHA
+        model = Matrix_Translate(-2.2f,0.0f,1.3f)
+            * Matrix_Rotate(0.3f, glm::vec4(0.0f, 1.0f, 0.0f, 0.0f))
+            * Matrix_Scale(1.0f, 1.0f,1.0f);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, RUBBER_DUCK);
+        DrawVirtualObject("rubber_duck_toy");
 
        
-       /*
-       model = Matrix_Rotate(seconds * 2, glm::vec4(0.0f, 1.0f, 0.0f, 0.0f))
-       * Matrix_Translate(0.0f,3.0f,0.0f);
+       /*============================================================================================
+        CANTO DE CONSTRUCAO
+        ============================================================================================*/
+       
+       //BARRIL DE METAL 1
+       model = Matrix_Translate(2.6f,0.0f,-3.2f)
+       * Matrix_Scale(0.42f, 0.42f,0.42f);
        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-       glUniform1i(g_object_id_uniform, CEILING_FAN);
-       DrawVirtualObject("ceiling_fan");
-       DrawVirtualObject("ceiling_fan_blades");
-       */
-      
-      
-      model = Matrix_Translate(1.0f,-0.5f,0.0f)
-      * Matrix_Scale(1.0f, 1.0f, 1.0f);
-      glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-      glUniform1i(g_object_id_uniform, CAT_STATUE);
-      DrawVirtualObject("concrete_cat_statue");
-      
-      
-      
-      
-      model = Matrix_Translate(1.0f,-0.5f,1.1f)
-      * Matrix_Scale(0.6f, 0.6f, 0.6f);
-      glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-      glUniform1i(g_object_id_uniform, ORNATE_MIRROR);
-      DrawVirtualObject("ornate_mirror_01");
-      
-      
-      model = Matrix_Translate(-0.5f,0.5f,-1.0f) // SUPORTE DA CAMERA
-      * Matrix_Scale(0.6f, 0.6f,0.6f);
-      glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-      glUniform1i(g_object_id_uniform, SECURITY_CAMERA);
-      DrawVirtualObject("security_camera_mount");
-      
-      model = Matrix_Translate(-0.5f,0.5f,-1.0f) //CAMERA E LENTE OLHANDO LEVEMENT PARA BAIXO
-      * Matrix_Rotate(0.2f, glm::vec4(1.0f, 0.0f, 0.0f, 0.0f))
-      * Matrix_Scale(0.6f, 0.6f,0.6f);
-      glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-      glUniform1i(g_object_id_uniform, SECURITY_CAMERA);
-      DrawVirtualObject("security_camera");
-      DrawVirtualObject("security_camera_lens");
-      
-      
-      
-      //BARRIL DE METAL 1
-      model = Matrix_Translate(2.6f,0.0f,-3.2f)
-      * Matrix_Scale(0.42f, 0.42f,0.42f);
-      glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
       glUniform1i(g_object_id_uniform, METAL_BARREL);
       DrawVirtualObject("barrel_03");
       
@@ -929,6 +1041,7 @@ int main(int argc, char* argv[])
       glUniform1i(g_object_id_uniform, WET_FLOOR_SIGN);
       DrawVirtualObject("WetFloorSign_01");
       
+      //EXTINTOR DE INCENDIO
       model = Matrix_Translate(2.5f,0.05f,-2.5f)
       * Matrix_Scale(0.00035f, 0.00035f, 0.00035f)
       * Matrix_Rotate(PI/4, glm::vec4(1.0f, 0.0f, 0.0f, 0.0f))
@@ -937,43 +1050,14 @@ int main(int argc, char* argv[])
       glUniform1i(g_object_id_uniform, FIRE_EXTINGUISHER);
       DrawVirtualObject("fire_extinguisher");
 
-      model = Matrix_Translate(-3.6f,0.0f,-4.2f)
-      * Matrix_Scale(5.0f, 5.0f,5.0f);
-      glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-      glUniform1i(g_object_id_uniform, WOOD_CUBE);
-      DrawVirtualObject("Text_C_.001_Text.047");
-      
-      model = Matrix_Translate(-3.75f,1.21f,-4.2f)
-      * Matrix_Scale(4.0f, 4.0f,4.0f);
-      glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-      glUniform1i(g_object_id_uniform, WOOD_CUBE);
-      DrawVirtualObject("Text_F_.001_Text.050"); // CUBO COM LETRA F (procurar no obj diferentes se precisar)
-      
-      model = Matrix_Translate(-3.2f,0.0f,-4.6f)
-      * Matrix_Scale(1.0f, 1.0f,1.0f)
-      * Matrix_Rotate(-PI/4, glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
-      glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-      glUniform1i(g_object_id_uniform, WOOD_CUBE);
-      DrawVirtualObject("Text_G_.001_Text.051");
-      
-      model = Matrix_Translate(-2.5f,0.0f,-1.9f)
-      * Matrix_Scale(1.0f, 1.0f,1.0f);
-      glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-      glUniform1i(g_object_id_uniform, WOOD_CUBE);
-      DrawVirtualObject("Text_0_.001_Text.080");
-      
-      model = Matrix_Translate(-2.5f,0.0f,-2.2f)
-      * Matrix_Scale(1.0f, 1.0f,1.0f);
-      glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-      glUniform1i(g_object_id_uniform, RUBBER_DUCK);
-      DrawVirtualObject("rubber_duck_toy");
       
       /*============================================================================================
       PAREDES E TETO DA SALA
       ============================================================================================*/
+
       // Desenhamos o plano do chão
       model = Matrix_Translate(0.0f,0.0f,0.0f) 
-      * Matrix_Scale(5.0f, 0.1f, 5.0f);
+      * Matrix_Scale(5.0f, 1.0f, 5.0f);
       glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
       glUniform1i(g_object_id_uniform, PLANE);
       DrawVirtualObject("the_plane");
@@ -1019,14 +1103,32 @@ int main(int argc, char* argv[])
       DrawVirtualObject("the_plane");
       
       //PAREDE EM -X
-      model = Matrix_Translate(-5.0f, 1.8f, 0.0f)
+      model = Matrix_Translate(-5.0f, 1.8f, 0.385f)
       * Matrix_Rotate(PI / 2.0f, glm::vec4(1.0f, 0.0f, 0.0f, 0.0f))
       * Matrix_Rotate(-PI / 2.0f, glm::vec4(0.0f, 0.0f, 1.0f, 0.0f))
-      * Matrix_Scale(5.0f, 1.0f, 1.2f);
+      * Matrix_Scale(4.615f, 1.0f, 1.2f);
       glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
       glUniform1i(g_object_id_uniform, METAL_WALL);
-      DrawVirtualObject("the_plane");
-      
+      DrawVirtualObject("the_plane"); //2.23y cima 1.20y baixo
+
+      //parede em -x em cima do door frame
+      model = Matrix_Translate(-5.0f, 2.615f, -4.615f)
+      * Matrix_Rotate(PI / 2.0f, glm::vec4(1.0f, 0.0f, 0.0f, 0.0f))
+      * Matrix_Rotate(-PI / 2.0f, glm::vec4(0.0f, 0.0f, 1.0f, 0.0f))
+      * Matrix_Scale(0.385f, 1.0f, 0.385f);
+      glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+      glUniform1i(g_object_id_uniform, METAL_WALL);
+      DrawVirtualObject("the_plane"); //2.23y cima 1.20y baixo
+
+      //parede em -x em baixo do door frame
+      model = Matrix_Translate(-5.0f, 0.9f, -4.615f)
+      * Matrix_Rotate(PI / 2.0f, glm::vec4(1.0f, 0.0f, 0.0f, 0.0f))
+      * Matrix_Rotate(-PI / 2.0f, glm::vec4(0.0f, 0.0f, 1.0f, 0.0f))
+      * Matrix_Scale(0.385f, 1.0f, 0.3f);
+      glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+      glUniform1i(g_object_id_uniform, METAL_WALL);
+      DrawVirtualObject("the_plane"); //2.23y cima 1.20y baixo
+
       //PAREDE EM -X AUXILIAR
       model = Matrix_Translate(-5.0f, 0.3f, 0.0f)
       * Matrix_Rotate(PI / 2.0f, glm::vec4(1.0f, 0.0f, 0.0f, 0.0f))
@@ -1053,11 +1155,36 @@ int main(int argc, char* argv[])
       glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
       glUniform1i(g_object_id_uniform, METAL_WALL_2);
       DrawVirtualObject("the_plane");
+
+           
+       /*============================================================================================
+        OBJETOS nao usados
+        =============================================================================================
+
+        // VENTILADOR
+        model = Matrix_Rotate(seconds * 2, glm::vec4(0.0f, 1.0f, 0.0f, 0.0f))
+        * Matrix_Translate(0.0f,3.0f,0.0f);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, CEILING_FAN);
+        DrawVirtualObject("ceiling_fan");
+        DrawVirtualObject("ceiling_fan_blades");
+        
+       // ESTATUA DA GATO
+       model = Matrix_Translate(1.0f,-0.5f,0.0f)
+       * Matrix_Scale(1.0f, 1.0f, 1.0f);
+       glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+       glUniform1i(g_object_id_uniform, CAT_STATUE);
+       DrawVirtualObject("concrete_cat_statue");
+       
+       //ESPELHO
+       model = Matrix_Translate(1.0f,-0.5f,1.1f)
+       * Matrix_Scale(0.6f, 0.6f, 0.6f);
+       glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+       glUniform1i(g_object_id_uniform, ORNATE_MIRROR);
+       DrawVirtualObject("ornate_mirror_01");
+       ============================================================================================*/
       
-      
-      
-      
-      
+    
       // Imprimimos na tela os ângulos de Euler que controlam a rotação do
       // terceiro cubo.
       TextRendering_ShowEulerAngles(window, lookX, lookY, lookZ);
@@ -1859,6 +1986,32 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
 
+    // Se o usuário apertar a tecla H, fazemos um "toggle" do texto informativo mostrado na tela.
+    if (key == GLFW_KEY_H && action == GLFW_PRESS)
+    {
+        g_ShowInfoText = !g_ShowInfoText;
+    }
+
+    //TECLAS DE MOVIMENTO WASD
+    if (key == GLFW_KEY_W) g_W_Pressed = (action != GLFW_RELEASE);
+    if (key == GLFW_KEY_A) g_A_Pressed = (action != GLFW_RELEASE);
+    if (key == GLFW_KEY_S) g_S_Pressed = (action != GLFW_RELEASE);
+    if (key == GLFW_KEY_D) g_D_Pressed = (action != GLFW_RELEASE);
+
+    //TECLAS DE MOVIMENTO SETAS
+    if (key == GLFW_KEY_UP) g_UP_Pressed = (action != GLFW_RELEASE);
+    if (key == GLFW_KEY_LEFT) g_LEFT_Pressed = (action != GLFW_RELEASE);
+    if (key == GLFW_KEY_DOWN) g_DOWN_Pressed = (action != GLFW_RELEASE);
+    if (key == GLFW_KEY_RIGHT) g_RIGHT_Pressed = (action != GLFW_RELEASE);
+
+    // TECLAS VOO
+    if (key == GLFW_KEY_SPACE) g_SPACE_Pressed = (action != GLFW_RELEASE);
+    if (key == GLFW_KEY_LEFT_SHIFT) g_SHIFT_Pressed = (action != GLFW_RELEASE);
+
+    /*================================
+    FUNCOES DE TECLAS NAO UTILIZADAS
+    ==================================*/
+    
     // O código abaixo implementa a seguinte lógica:
     //   Se apertar tecla X       então g_AngleX += delta;
     //   Se apertar tecla shift+X então g_AngleX -= delta;
@@ -1867,6 +2020,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
     //   Se apertar tecla Z       então g_AngleZ += delta;
     //   Se apertar tecla shift+Z então g_AngleZ -= delta;
 
+    /*
     float delta = PI / 16; // 22.5 graus, em radianos.
 
     if (key == GLFW_KEY_X && action == GLFW_PRESS)
@@ -1907,12 +2061,6 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
         g_UsePerspectiveProjection = false;
     }
 
-    // Se o usuário apertar a tecla H, fazemos um "toggle" do texto informativo mostrado na tela.
-    if (key == GLFW_KEY_H && action == GLFW_PRESS)
-    {
-        g_ShowInfoText = !g_ShowInfoText;
-    }
-
     // Se o usuário apertar a tecla R, recarregamos os shaders dos arquivos "shader_fragment.glsl" e "shader_vertex.glsl".
     if (key == GLFW_KEY_R && action == GLFW_PRESS)
     {
@@ -1920,19 +2068,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
         fprintf(stdout,"Shaders recarregados!\n");
         fflush(stdout);
     }
-    
-    if (key == GLFW_KEY_W) g_W_Pressed = (action != GLFW_RELEASE);
-    if (key == GLFW_KEY_A) g_A_Pressed = (action != GLFW_RELEASE);
-    if (key == GLFW_KEY_S) g_S_Pressed = (action != GLFW_RELEASE);
-    if (key == GLFW_KEY_D) g_D_Pressed = (action != GLFW_RELEASE);
-
-    if (key == GLFW_KEY_UP) g_UP_Pressed = (action != GLFW_RELEASE);
-    if (key == GLFW_KEY_LEFT) g_LEFT_Pressed = (action != GLFW_RELEASE);
-    if (key == GLFW_KEY_DOWN) g_DOWN_Pressed = (action != GLFW_RELEASE);
-    if (key == GLFW_KEY_RIGHT) g_RIGHT_Pressed = (action != GLFW_RELEASE);
-
-    if (key == GLFW_KEY_SPACE) g_SPACE_Pressed = (action != GLFW_RELEASE);
-    if (key == GLFW_KEY_LEFT_SHIFT) g_SHIFT_Pressed = (action != GLFW_RELEASE);
+    */
 
 }
 
@@ -2016,7 +2152,7 @@ void TextRendering_ShowEulerAngles(GLFWwindow* window, float lookX, float lookY,
     char buffer[100];
 
     snprintf(buffer, sizeof(buffer), "GLiminal 1.0 - Player Pos: X = %.2f | Y = %.2f | Z = %.2f\n", g_CameraPos.x, g_CameraPos.y, g_CameraPos.z);
-    TextRendering_PrintString(window, buffer, -1.0f + pad/10, -1.0f + 2*pad/10, 1.0f);
+    TextRendering_PrintString(window, buffer, -1.0f + pad/10, -1.0f + 80*pad/10, 1.0f);
 
     snprintf(buffer, sizeof(buffer), "Camera View - X = %.2f | Y = %.2f | Z = %.2f\n", lookX, lookY, lookZ);
     TextRendering_PrintString(window, buffer, -1.0f + pad/10, -1.0f + 10*pad/10, 1.0f);

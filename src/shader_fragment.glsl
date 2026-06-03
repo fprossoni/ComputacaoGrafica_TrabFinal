@@ -47,6 +47,7 @@ uniform mat4 projection;
 #define INDUSTRIAL_LAMP_COVER 21
 #define CHESS_BLACK_PIECE 22
 #define CARPET 23
+#define DOOR_FRAME 24
 
 
 uniform int object_id;
@@ -198,6 +199,14 @@ void main()
     else if ( object_id == METAL_WALL_2 )
     {
         Kd0 = vec3(0.13, 0.42, 0.30);
+    }
+    else if ( object_id == DOOR_FRAME )
+    {
+        float U = texcoords.x;
+        float V = texcoords.y; 
+
+		// Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
+		Kd0 = texture(TextureImage22, vec2(U,V)).rgb;
     }
 
     else if ( object_id == METAL_CEILING)
