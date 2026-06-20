@@ -95,7 +95,6 @@ float g_AngleX = 0.0f;
 float g_AngleY = 0.0f;
 float g_AngleZ = 0.0f;
 
-bool g_LeftMouseClick = false;
 bool g_RightMouseButtonPressed = false; // Análogo para botão direito do mouse
 bool g_MiddleMouseButtonPressed = false; // Análogo para botão do meio do mouse
 
@@ -299,7 +298,7 @@ int main(int argc, char* argv[])
     BuildTrianglesAndAddToVirtualScene(&door_frame);
 
     /*============================================================================================
-        OBJETOS INTERATIVOS
+        OBJETOS INTERATIVOS INICIAIS
     ============================================================================================*/
 
     // Instancias iniciais de objetos dinamicos
@@ -383,71 +382,21 @@ int main(int argc, char* argv[])
         float lookY = view_vector.y + g_CameraPos.y;
         float lookZ = view_vector.z + g_CameraPos.z;
 
-        float seconds = (float)glfwGetTime();
+        float current_time = (float)glfwGetTime();
+        static float previous_time = current_time;
+        float deltaTime = current_time - previous_time;
+        previous_time = current_time;
 
-        UpdatePlayerPosition(view_vector, up);
-        /*
-        if (g_CameraPos.y > 0.5f){
-            g_CameraPos.y -= 0.015f;
-        }
-            */
+        if (deltaTime > 0.1f) deltaTime = 0.1f;
+
+        UpdatePlayerPosition(view_vector, up, deltaTime);
 
         glm::mat4 view = Matrix_Camera_View(g_CameraPos, view_vector, up);
 
         glm::vec3 cPos = glm::vec3(g_CameraPos.x, g_CameraPos.y, g_CameraPos.z);
         glm::vec3 vDir = glm::normalize(glm::vec3(view_vector.x, view_vector.y, view_vector.z));
 
-        // Detecta o exato frame em que o botão esquerdo foi CLICADO (e não segurado)
-        bool mouseClickedThisFrame = g_LeftMouseButtonPressed && !g_LeftMouseClick;
-        g_LeftMouseClick = g_LeftMouseButtonPressed; // Atualiza para o próximo frame
-
-        if (mouseClickedThisFrame) {
-            if (!g_IsHoldingObject) {
-                // tentar pegar objeto
-                for (size_t i = 0; i < g_InteractiveObjects.size(); ++i) {
-                    glm::vec3 toObject = g_InteractiveObjects[i].position - cPos;
-                    float projection = glm::dot(toObject, vDir);
-                    glm::vec3 closestPoint = cPos + vDir * projection;
-                    float distanceToRay = glm::distance(g_InteractiveObjects[i].position, closestPoint);
-
-                    // se raio apssar perto do centro dod objeto
-                    if (distanceToRay < 0.6f && glm::length(toObject) < 6.0f) { 
-                        g_IsHoldingObject = true;
-                        g_HeldObjectIndex = i;
-                        
-                        // distancia atual
-                        g_PickDistance = glm::length(toObject);
-                        // escala tual
-                        g_InteractiveObjects[i].scale_when_picked = g_InteractiveObjects[i].scale;
-                        break;
-                    }
-                }
-            } 
-            else {
-                // calculo de novo tamanho
-                float hit_distance = RaycastSceneDistance(cPos, vDir);
-                
-                if (hit_distance > 0.1f) {
-                    InteractiveObject& obj = g_InteractiveObjects[g_HeldObjectIndex];
-                    
-                    // nova posicao onde objeto colidiu
-                    obj.position = cPos + vDir * hit_distance;
-                    
-                    //  novo tamanho do objeto
-                    float scale_factor = hit_distance / g_PickDistance;
-                    obj.scale = obj.scale_when_picked * scale_factor;
-                }
-                
-                g_IsHoldingObject = false;
-                g_HeldObjectIndex = -1;
-            }
-        }
-
-        // Segurando
-        if (g_IsHoldingObject && g_HeldObjectIndex != -1) {
-            InteractiveObject& obj = g_InteractiveObjects[g_HeldObjectIndex];
-            obj.position = cPos + vDir * g_PickDistance;
-        }
+        HandleInteraction(cPos, vDir);
 
         
 
