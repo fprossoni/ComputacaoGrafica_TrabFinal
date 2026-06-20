@@ -305,9 +305,26 @@ int main(int argc, char* argv[])
         InteractiveObject duck;
         duck.scene_name = "rubber_duck_toy";
         duck.object_id = RUBBER_DUCK;
-        duck.position = glm::vec3(-1.5f, 0.0f, -1.0f); // Posiçcao inicial antiga
+        duck.position = glm::vec3(-1.5f, 0.0f, -1.0f);
         duck.scale = glm::vec3(1.0f, 1.0f, 1.0f);
         duck.scale_when_picked = duck.scale;
+        {
+            auto it = g_VirtualScene.find("rubber_duck_toy");
+            if (it != g_VirtualScene.end())
+            {
+                const auto& bbox_min = it->second.bbox_min;
+                const auto& bbox_max = it->second.bbox_max;
+                duck.base_neg_offset = glm::vec3(
+                    std::max(0.0f, -bbox_min.x),
+                    std::max(0.0f, -bbox_min.y),
+                    std::max(0.0f, -bbox_min.z));
+                duck.base_pos_offset = glm::vec3(
+                    std::max(0.0f,  bbox_max.x),
+                    std::max(0.0f,  bbox_max.y),
+                    std::max(0.0f,  bbox_max.z));
+            }
+        }
+        duck.velocity = glm::vec3(0.0f);
 
         g_InteractiveObjects.push_back(duck);
 
@@ -397,6 +414,7 @@ int main(int argc, char* argv[])
         glm::vec3 vDir = glm::normalize(glm::vec3(view_vector.x, view_vector.y, view_vector.z));
 
         HandleInteraction(cPos, vDir);
+        UpdateInteractiveObjects(deltaTime);
 
         
 
