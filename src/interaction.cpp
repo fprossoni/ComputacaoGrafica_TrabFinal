@@ -38,14 +38,13 @@ float RaycastSceneDistance(glm::vec3 ray_origin, glm::vec3 ray_direction)
     return ray_max;
 }
 
-// Detecta o exato frame em que o botão esquerdo foi CLICADO (e não segurado)
 void HandleInteraction(glm::vec3 cPos, glm::vec3 vDir)
 {
     static bool prevLeftMousePressed = false;
-    bool mouseClickedThisFrame = g_LeftMouseButtonPressed && !prevLeftMousePressed;
+    bool clicked = g_LeftMouseButtonPressed && !prevLeftMousePressed;
     prevLeftMousePressed = g_LeftMouseButtonPressed;
 
-    if (mouseClickedThisFrame)
+    if (clicked)
     {
         if (!g_IsHoldingObject)
         {
@@ -68,16 +67,6 @@ void HandleInteraction(glm::vec3 cPos, glm::vec3 vDir)
         }
         else
         {
-            float hit_distance = RaycastSceneDistance(cPos, vDir);
-
-            if (hit_distance > 0.1f)
-            {
-                InteractiveObject& obj = g_InteractiveObjects[g_HeldObjectIndex];
-                obj.position = cPos + vDir * hit_distance;
-                float scale_factor = hit_distance / g_PickDistance;
-                obj.scale = obj.scale_when_picked * scale_factor;
-            }
-
             g_IsHoldingObject = false;
             g_HeldObjectIndex = -1;
         }
@@ -86,6 +75,17 @@ void HandleInteraction(glm::vec3 cPos, glm::vec3 vDir)
     if (g_IsHoldingObject && g_HeldObjectIndex != -1)
     {
         InteractiveObject& obj = g_InteractiveObjects[g_HeldObjectIndex];
-        obj.position = cPos + vDir * g_PickDistance;
+        float hit_distance = RaycastSceneDistance(cPos, vDir);
+
+        if (hit_distance > 0.1f)
+        {
+            obj.position = cPos + vDir * hit_distance;
+            float ratio = hit_distance / g_PickDistance;
+            obj.scale = obj.scale_when_picked * ratio;
+        }
+        else
+        {
+            obj.position = cPos + vDir * g_PickDistance;
+        }
     }
 }
