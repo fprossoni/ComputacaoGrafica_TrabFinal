@@ -826,12 +826,21 @@ int main(int argc, char* argv[])
         glUniform1i(g_object_id_uniform, WOOD_CUBE);
         DrawVirtualObject("Text_C_.001_Text.047");
 
-        //BANANAS
-        model = Matrix_Translate(-0.8f,0.03f,2.0f)
-            * Matrix_Scale(1.0f, 1.0f,1.0f);
-        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(g_object_id_uniform, BANANAS);
-        DrawVirtualObject("bananas_c");
+        //BANANAS (curva de Bezier cubica no chao, area do tapete)
+        {
+            float t = fmod((float)glfwGetTime() * 0.25f, 1.0f);
+            float u = 1.0f - t;
+            glm::vec4 P0(-2.5f, 0.05f, 2.8f, 1.0f);
+            glm::vec4 P1(-0.5f, 0.05f, 2.8f, 1.0f);
+            glm::vec4 P2(-0.5f, 0.05f, 1.2f, 1.0f);
+            glm::vec4 P3(-2.5f, 0.05f, 1.2f, 1.0f);
+            glm::vec4 pos = u*u*u*P0 + 3.0f*u*u*t*P1 + 3.0f*u*t*t*P2 + t*t*t*P3;
+            model = Matrix_Translate(pos.x, pos.y, pos.z)
+                * Matrix_Scale(1.0f, 1.0f, 1.0f);
+            glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+            glUniform1i(g_object_id_uniform, BANANAS);
+            DrawVirtualObject("bananas_c");
+        }
     
         //PATO DE BORRACHA
         /*
