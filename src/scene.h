@@ -59,6 +59,28 @@ extern GLint g_object_id_uniform;
 extern GLint g_bbox_min_uniform;
 extern GLint g_bbox_max_uniform;
 
+struct CollidableAABB {
+    glm::vec3 min, max;
+};
+extern std::vector<CollidableAABB> g_StaticCollidables;
+
+static inline CollidableAABB ComputeWorldAABB(const glm::vec3& bmin, const glm::vec3& bmax, const glm::mat4& model)
+{
+    CollidableAABB aabb;
+    aabb.min = glm::vec3(1e9f);
+    aabb.max = glm::vec3(-1e9f);
+    for (int i = 0; i < 8; ++i)
+    {
+        glm::vec3 c(i & 1 ? bmax.x : bmin.x,
+                    i & 2 ? bmax.y : bmin.y,
+                    i & 4 ? bmax.z : bmin.z);
+        glm::vec4 wc = model * glm::vec4(c, 1.0f);
+        aabb.min = glm::min(aabb.min, glm::vec3(wc));
+        aabb.max = glm::max(aabb.max, glm::vec3(wc));
+    }
+    return aabb;
+}
+
 // Meus objetos
 #define SPHERE 0
 #define BUNNY  1

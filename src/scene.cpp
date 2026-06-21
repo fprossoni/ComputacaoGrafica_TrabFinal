@@ -20,6 +20,8 @@ std::map<std::string, SceneObject> g_VirtualScene;
 std::stack<glm::mat4> g_MatrixStack;
 float g_ScreenRatio = 1.0f;
 
+std::vector<CollidableAABB> g_StaticCollidables;
+
 GLuint g_GpuProgramID = 0;
 GLint g_model_uniform;
 GLint g_view_uniform;
