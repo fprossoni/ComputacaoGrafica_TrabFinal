@@ -26,7 +26,6 @@
 #define ROOM_Y_MIN 0.0f
 #define ROOM_Y_MAX 3.0f
 
-// Door opening 
 #define DOOR_Z_CENTER -4.615f
 #define DOOR_Z_HALF 0.4f
 #define DOOR_Y_BOTTOM 1.1f
