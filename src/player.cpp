@@ -190,7 +190,6 @@ void UpdatePlayerPosition(glm::vec4 view_vector, glm::vec4 up, float deltaTime)
     if (g_SPACE_Pressed && IsOnSurface(cur_feet_y, g_CameraPos.x, g_CameraPos.z, r))
         g_VerticalVelocity = JUMP_SPEED;
 
-    // Gravity
     g_VerticalVelocity -= GRAVITY * deltaTime;
     g_CameraPos.y += g_VerticalVelocity * deltaTime;
 

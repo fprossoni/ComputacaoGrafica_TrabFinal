@@ -124,24 +124,24 @@ static void ClampObjectToStatics(InteractiveObject& obj)
             if (ox <= oy && ox <= oz)
             {
                 if (obj.position.x < s.min.x)
-                    obj.position.x = s.min.x - obj.base_neg_offset.x * obj.scale.x;
+                    obj.position.x = s.min.x - obj.base_pos_offset.x * obj.scale.x;
                 else
-                    obj.position.x = s.max.x + obj.base_pos_offset.x * obj.scale.x;
+                    obj.position.x = s.max.x + obj.base_neg_offset.x * obj.scale.x;
             }
             else if (oy <= ox && oy <= oz)
             {
                 if (obj.position.y < s.min.y)
-                    obj.position.y = s.min.y - obj.base_neg_offset.y * obj.scale.y;
+                    obj.position.y = s.min.y - obj.base_pos_offset.y * obj.scale.y;
                 else
-                    obj.position.y = s.max.y + obj.base_pos_offset.y * obj.scale.y;
+                    obj.position.y = s.max.y + obj.base_neg_offset.y * obj.scale.y;
                 obj.velocity.y = 0.0f;
             }
             else
             {
                 if (obj.position.z < s.min.z)
-                    obj.position.z = s.min.z - obj.base_neg_offset.z * obj.scale.z;
+                    obj.position.z = s.min.z - obj.base_pos_offset.z * obj.scale.z;
                 else
-                    obj.position.z = s.max.z + obj.base_pos_offset.z * obj.scale.z;
+                    obj.position.z = s.max.z + obj.base_neg_offset.z * obj.scale.z;
             }
 
             obj_min = obj.position - obj.base_neg_offset * obj.scale;
