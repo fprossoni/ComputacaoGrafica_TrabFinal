@@ -443,6 +443,14 @@ int main(int argc, char* argv[])
         * Matrix_Scale(1.0f,1.0f,1.0f) 
         * Matrix_Rotate(-PI/4,glm::vec4(0.0f,1.0f,0.0f,0.0f));
         add_collidable("Text_G_.001_Text.051", M);
+
+        // Corridor walls (past the door at x=-5)
+        g_StaticCollidables.push_back({{-8.0f, 0.0f, -5.065f},
+                                       {-5.0f, 3.0f, -4.965f}}); // left wall
+        g_StaticCollidables.push_back({{-8.0f, 0.0f, -4.265f},
+                                       {-5.0f, 3.0f, -4.165f}}); // right wall
+        g_StaticCollidables.push_back({{-8.05f, 0.0f, -5.065f},
+                                       {-7.95f, 3.0f, -4.165f}}); // back wall
     }
 
     if ( argc > 1 )
@@ -1004,7 +1012,51 @@ int main(int argc, char* argv[])
       glUniform1i(g_object_id_uniform, METAL_WALL_2);
       DrawVirtualObject("the_plane");
 
-           
+      /*============================================================================================
+        CORREDOR
+      ============================================================================================*/
+
+      // Floor
+      model = Matrix_Translate(-6.5f, 0.0f, -4.615f)
+          * Matrix_Scale(1.5f, 1.0f, 0.4f);
+      glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+      glUniform1i(g_object_id_uniform, METAL_WALL_2);
+      DrawVirtualObject("the_plane");
+
+      // Ceiling
+      model = Matrix_Translate(-6.5f, 3.0f, -4.615f)
+          * Matrix_Rotate(PI, glm::vec4(1.0f, 0.0f, 0.0f, 0.0f))
+          * Matrix_Scale(1.5f, 0.1f, 0.4f);
+      glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+      glUniform1i(g_object_id_uniform, METAL_CEILING);
+      DrawVirtualObject("the_plane");
+
+      // Left wall 
+      model = Matrix_Translate(-6.5f, 1.5f, -5.015f)
+          * Matrix_Rotate(PI / 2.0f, glm::vec4(1.0f, 0.0f, 0.0f, 0.0f))
+          * Matrix_Scale(1.5f, 1.0f, 1.5f);
+      glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+      glUniform1i(g_object_id_uniform, METAL_WALL);
+      DrawVirtualObject("the_plane");
+
+      // Right wall
+      model = Matrix_Translate(-6.5f, 1.5f, -4.215f)
+          * Matrix_Rotate(-PI / 2.0f, glm::vec4(1.0f, 0.0f, 0.0f, 0.0f))
+          * Matrix_Scale(1.5f, 1.0f, 1.5f);
+      glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+      glUniform1i(g_object_id_uniform, METAL_WALL);
+      DrawVirtualObject("the_plane");
+
+      // Back wall
+      model = Matrix_Translate(-8.0f, 1.5f, -4.615f)
+          * Matrix_Rotate(-PI / 2.0f, glm::vec4(1.0f, 0.0f, 0.0f, 0.0f))
+          * Matrix_Rotate(PI / 2.0f, glm::vec4(0.0f, 0.0f, 1.0f, 0.0f))
+          * Matrix_Scale(0.4f, 1.0f, 1.5f);
+      glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+      glUniform1i(g_object_id_uniform, METAL_WALL);
+      DrawVirtualObject("the_plane");
+
+      
        /*============================================================================================
         OBJETOS nao usados
         =============================================================================================

@@ -184,6 +184,15 @@ void UpdatePlayerPosition(glm::vec4 view_vector, glm::vec4 up, float deltaTime)
             new_x = ROOM_X_MIN + r;
     }
 
+    if (new_x <= ROOM_X_MIN)
+    {
+        float corr_z_min = DOOR_Z_CENTER - DOOR_Z_HALF + r;
+        float corr_z_max = DOOR_Z_CENTER + DOOR_Z_HALF - r;
+        if (new_z < corr_z_min) new_z = corr_z_min;
+        if (new_z > corr_z_max) new_z = corr_z_max;
+        if (new_x < CORRIDOR_X_MIN + r) new_x = CORRIDOR_X_MIN + r;
+    }
+
     g_CameraPos.x = new_x;
     g_CameraPos.z = new_z;
 

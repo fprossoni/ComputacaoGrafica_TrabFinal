@@ -31,6 +31,8 @@
 #define DOOR_Y_BOTTOM 1.1f
 #define DOOR_Y_TOP 2.42f
 
+#define CORRIDOR_X_MIN -8.0f
+
 extern glm::vec4 g_CameraPos;
 extern float g_CameraTheta;
 extern float g_CameraPhi;
