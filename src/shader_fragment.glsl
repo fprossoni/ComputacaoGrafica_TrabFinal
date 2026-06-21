@@ -48,6 +48,7 @@ uniform mat4 projection;
 #define CHESS_BLACK_PIECE 22
 #define CARPET 23
 #define DOOR_FRAME 24
+#define PLASTER_WALL 25
 
 
 uniform int object_id;
@@ -81,12 +82,6 @@ uniform sampler2D TextureImage20;
 uniform sampler2D TextureImage21;
 uniform sampler2D TextureImage22;
 uniform sampler2D TextureImage23;
-uniform sampler2D TextureImage24;
-uniform sampler2D TextureImage25;
-uniform sampler2D TextureImage26;
-uniform sampler2D TextureImage27;
-uniform sampler2D TextureImage28;
-uniform sampler2D TextureImage29;
 
 
 // O valor de saída ("out") de um Fragment Shader é a cor final do fragmento.
@@ -207,6 +202,15 @@ void main()
 
 		// Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
 		Kd0 = texture(TextureImage22, vec2(U,V)).rgb;
+    }
+
+    else if ( object_id == PLASTER_WALL )
+    {
+        float U = texcoords.x;
+        float V = texcoords.y; 
+
+		// Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
+		Kd0 = texture(TextureImage23, vec2(U,V)).rgb;
     }
 
     else if ( object_id == METAL_CEILING)

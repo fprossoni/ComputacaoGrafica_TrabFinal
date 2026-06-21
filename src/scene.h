@@ -97,6 +97,7 @@ static inline CollidableAABB ComputeWorldAABB(const glm::vec3& bmin, const glm::
 #define CHESS_BLACK_PIECE 22
 #define CARPET 23
 #define DOOR_FRAME 24
+#define PLASTER_WALL 25
 
 #define PI 3.141592
 #define PIF 3.141592f

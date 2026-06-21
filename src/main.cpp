@@ -223,6 +223,7 @@ int main(int argc, char* argv[])
     LoadTextureImage("../../data/textures/chess_set_pieces_black_diff_1k.jpg"); // TextureImage20
     LoadTextureImage("../../data/textures/_02_-_Default.jpg"); // TextureImage21
     LoadTextureImage("../../data/textures/plastered_wall_05_diff_1k.jpg"); // TextureImage22
+    LoadTextureImage("../../data/textures/painted_plaster_wall_diff_1k.jpg"); // TextureImage23
 
     // Construímos a representação de objetos geométricos através de malhas de triângulos
     ObjModel spheremodel("../../data/sphere.obj");
@@ -1187,12 +1188,6 @@ void LoadShadersFromFiles()
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage21"), 21);
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage22"), 22);
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage23"), 23);
-    glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage24"), 24);
-    glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage25"), 25);
-    glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage26"), 26);
-    glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage27"), 27);
-    glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage28"), 28);
-    glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage29"), 29);
     glUseProgram(0);
 }
 
