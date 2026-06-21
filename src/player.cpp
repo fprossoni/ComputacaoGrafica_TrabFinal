@@ -178,7 +178,7 @@ void UpdatePlayerPosition(glm::vec4 view_vector, glm::vec4 up, float deltaTime)
         PushHorizontally(new_x, new_z, r, obj_min, obj_max, cur_feet_y, cur_head_y);
     }
 
-    if (new_x < ROOM_X_MIN + r)
+    if (new_x < ROOM_X_MIN + r && g_CameraPos.x >= ROOM_X_MIN)
     {
         if (HitsWall(new_z, cur_feet_y, cur_head_y, r))
             new_x = ROOM_X_MIN + r;
