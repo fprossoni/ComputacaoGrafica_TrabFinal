@@ -224,6 +224,7 @@ int main(int argc, char* argv[])
     LoadTextureImage("../../data/textures/_02_-_Default.jpg"); // TextureImage21
     LoadTextureImage("../../data/textures/plastered_wall_05_diff_1k.jpg"); // TextureImage22
     LoadTextureImage("../../data/textures/painted_plaster_wall_diff_1k.jpg"); // TextureImage23
+    LoadTextureImage("../../data/textures/bananas_diff_2k.jpg"); // TextureImage24
 
     // Construímos a representação de objetos geométricos através de malhas de triângulos
     ObjModel spheremodel("../../data/sphere.obj");
@@ -297,6 +298,10 @@ int main(int argc, char* argv[])
     ObjModel door_frame("../../data/door_frame.obj");
     ComputeNormals(&door_frame);
     BuildTrianglesAndAddToVirtualScene(&door_frame);
+
+    ObjModel bananas("../../data/bananas_2k.obj");
+    ComputeNormals(&bananas);
+    BuildTrianglesAndAddToVirtualScene(&bananas);
 
     /*============================================================================================
         OBJETOS INTERATIVOS INICIAIS
@@ -820,6 +825,13 @@ int main(int argc, char* argv[])
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, WOOD_CUBE);
         DrawVirtualObject("Text_C_.001_Text.047");
+
+        //BANANAS
+        model = Matrix_Translate(-0.8f,0.03f,2.0f)
+            * Matrix_Scale(1.0f, 1.0f,1.0f);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, BANANAS);
+        DrawVirtualObject("bananas_c");
     
         //PATO DE BORRACHA
         /*
@@ -1190,6 +1202,7 @@ void LoadShadersFromFiles()
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage21"), 21);
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage22"), 22);
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage23"), 23);
+    glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage24"), 24);
     glUseProgram(0);
 }
 
