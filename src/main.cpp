@@ -1636,9 +1636,11 @@ void TextRendering_ShowEulerAngles(GLFWwindow* window, float lookX, float lookY,
     snprintf(buffer, sizeof(buffer), "GLiminal 1.0 - Player Pos: X = %.2f | Y = %.2f | Z = %.2f\n", g_CameraPos.x, g_CameraPos.y, g_CameraPos.z);
     TextRendering_PrintString(window, buffer, -1.0f + pad/10, -1.0f + 20*pad/10, 1.0f);
 
+    /*
     snprintf(buffer, sizeof(buffer), "Camera View - X = %.2f | Y = %.2f | Z = %.2f\n", lookX, lookY, lookZ);
     TextRendering_PrintString(window, buffer, -1.0f + pad/10, -1.0f + 10*pad/10, 1.0f);
-
+    */
+   
     snprintf(buffer, sizeof(buffer), "+"); // crosshair
     TextRendering_PrintString(window, buffer, 0.0f, 0.0f, 1.0f);
 }
