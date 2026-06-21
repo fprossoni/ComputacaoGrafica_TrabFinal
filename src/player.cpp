@@ -147,8 +147,8 @@ void UpdatePlayerPosition(glm::vec4 view_vector, glm::vec4 up, float deltaTime)
     if (g_LEFT_Pressed)  { dx += side.x / WALK_SPEED;       dz += side.z / WALK_SPEED;       }
     if (g_RIGHT_Pressed) { dx -= side.x / WALK_SPEED;       dz -= side.z / WALK_SPEED;       }
 
-    float new_x = g_CameraPos.x + dx * speed;
-    float new_z = g_CameraPos.z + dz * speed;
+    float new_x = g_CameraPos.x + dx * speed * deltaTime;
+    float new_z = g_CameraPos.z + dz * speed * deltaTime;
     float r = PLAYER_RADIUS;
     float cur_feet_y = g_CameraPos.y - PLAYER_EYE_HEIGHT;
     float cur_head_y = g_CameraPos.y + (PLAYER_HEIGHT - PLAYER_EYE_HEIGHT);
