@@ -4,6 +4,8 @@
 #include <cmath>
 #include <glm/glm.hpp>
 
+#include "scene.h"
+
 std::vector<InteractiveObject> g_InteractiveObjects;
 bool g_IsHoldingObject = false;
 int g_HeldObjectIndex = -1;
@@ -106,6 +108,48 @@ static void ClampObjectToRoom(InteractiveObject& obj)
     }
 }
 
+static void ClampObjectToStatics(InteractiveObject& obj)
+{
+    glm::vec3 obj_min = obj.position - obj.base_neg_offset * obj.scale;
+    glm::vec3 obj_max = obj.position + obj.base_pos_offset * obj.scale;
+
+    for (const auto& s : g_StaticCollidables)
+    {
+        float ox = std::min(obj_max.x, s.max.x) - std::max(obj_min.x, s.min.x);
+        float oy = std::min(obj_max.y, s.max.y) - std::max(obj_min.y, s.min.y);
+        float oz = std::min(obj_max.z, s.max.z) - std::max(obj_min.z, s.min.z);
+
+        if (ox > 0.0f && oy > 0.0f && oz > 0.0f)
+        {
+            if (ox <= oy && ox <= oz)
+            {
+                if (obj.position.x < s.min.x)
+                    obj.position.x = s.min.x - obj.base_neg_offset.x * obj.scale.x;
+                else
+                    obj.position.x = s.max.x + obj.base_pos_offset.x * obj.scale.x;
+            }
+            else if (oy <= ox && oy <= oz)
+            {
+                if (obj.position.y < s.min.y)
+                    obj.position.y = s.min.y - obj.base_neg_offset.y * obj.scale.y;
+                else
+                    obj.position.y = s.max.y + obj.base_pos_offset.y * obj.scale.y;
+                obj.velocity.y = 0.0f;
+            }
+            else
+            {
+                if (obj.position.z < s.min.z)
+                    obj.position.z = s.min.z - obj.base_neg_offset.z * obj.scale.z;
+                else
+                    obj.position.z = s.max.z + obj.base_pos_offset.z * obj.scale.z;
+            }
+
+            obj_min = obj.position - obj.base_neg_offset * obj.scale;
+            obj_max = obj.position + obj.base_pos_offset * obj.scale;
+        }
+    }
+}
+
 void HandleInteraction(glm::vec3 cPos, glm::vec3 vDir)
 {
     static bool prevLeftMousePressed = false;
@@ -177,6 +221,8 @@ void HandleInteraction(glm::vec3 cPos, glm::vec3 vDir)
                         offset[i] = hit_normal[i] * pos_ext[i];
                 }
                 obj.position = raw_pos + offset;
+
+                ClampObjectToStatics(obj);
             }
 
             obj.velocity = glm::vec3(0.0f);
@@ -214,5 +260,6 @@ void UpdateInteractiveObjects(float deltaTime)
         obj.velocity.y -= OBJECT_GRAVITY * deltaTime;
         obj.position += obj.velocity * deltaTime;
         ClampObjectToRoom(obj);
+        ClampObjectToStatics(obj);
     }
 }
