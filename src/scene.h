@@ -1,13 +1,3 @@
-//     Universidade Federal do Rio Grande do Sul
-//             Instituto de Informática
-//       Departamento de Informática Aplicada
-//
-//    INF01047 Computação Gráfica e Visualização I
-//               Prof. Eduardo Gastal
-//
-//     CÓDIGO BASE PARA O TRABALHO FINAL
-//
-
 #ifndef SCENE_H
 #define SCENE_H
 
