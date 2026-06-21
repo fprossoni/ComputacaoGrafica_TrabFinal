@@ -666,13 +666,6 @@ int main(int argc, char* argv[])
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, WOOD_CUBE);
         DrawVirtualObject("Text_G_.001_Text.051");
-        
-        //PATO AMASSADO
-        model = Matrix_Translate(-4.4f,0.0f,-4.3f)
-        * Matrix_Scale(4.0f, 0.1f, 4.0f);
-        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(g_object_id_uniform, RUBBER_DUCK);
-        DrawVirtualObject("rubber_duck_toy"); 
 
         //DOOR FRAME DE SAIDA
         model = Matrix_Translate(-4.8f,1.70f,-5.11f)
@@ -1017,65 +1010,74 @@ int main(int argc, char* argv[])
         CORREDOR
       ============================================================================================*/
 
-      // Floor
+      // Chao
       model = Matrix_Translate(-6.5f, 0.0f, -4.615f)
           * Matrix_Scale(1.5f, 1.0f, 0.4f);
       glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-      glUniform1i(g_object_id_uniform, METAL_WALL_2);
+      glUniform1i(g_object_id_uniform, PLASTER_WALL);
       DrawVirtualObject("the_plane");
 
-      // Ceiling
+      // Teto
       model = Matrix_Translate(-6.5f, 3.0f, -4.615f)
           * Matrix_Rotate(PI, glm::vec4(1.0f, 0.0f, 0.0f, 0.0f))
           * Matrix_Scale(1.5f, 0.1f, 0.4f);
       glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-      glUniform1i(g_object_id_uniform, METAL_CEILING);
+      glUniform1i(g_object_id_uniform, PLASTER_WALL);
       DrawVirtualObject("the_plane");
 
-      // Left wall 
+      // PArede esquerda
       model = Matrix_Translate(-6.5f, 1.5f, -5.015f)
           * Matrix_Rotate(PI / 2.0f, glm::vec4(1.0f, 0.0f, 0.0f, 0.0f))
           * Matrix_Scale(1.5f, 1.0f, 1.5f);
       glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-      glUniform1i(g_object_id_uniform, METAL_WALL);
+      glUniform1i(g_object_id_uniform, PLASTER_WALL);
       DrawVirtualObject("the_plane");
 
-      // Right wall
+      // Parede rdireita
       model = Matrix_Translate(-6.5f, 1.5f, -4.215f)
           * Matrix_Rotate(-PI / 2.0f, glm::vec4(1.0f, 0.0f, 0.0f, 0.0f))
           * Matrix_Scale(1.5f, 1.0f, 1.5f);
       glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-      glUniform1i(g_object_id_uniform, METAL_WALL);
+      glUniform1i(g_object_id_uniform, PLASTER_WALL);
       DrawVirtualObject("the_plane");
 
-      // Back wall
+      // Parede de fundo
       model = Matrix_Translate(-8.0f, 1.5f, -4.615f)
-          * Matrix_Rotate(-PI / 2.0f, glm::vec4(1.0f, 0.0f, 0.0f, 0.0f))
-          * Matrix_Rotate(PI / 2.0f, glm::vec4(0.0f, 0.0f, 1.0f, 0.0f))
+          * Matrix_Rotate(PI / 2.0f, glm::vec4(1.0f, 0.0f, 0.0f, 0.0f))
+          * Matrix_Rotate(-PI / 2.0f, glm::vec4(0.0f, 0.0f, 1.0f, 0.0f))
           * Matrix_Scale(0.4f, 1.0f, 1.5f);
       glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-      glUniform1i(g_object_id_uniform, METAL_WALL);
+      glUniform1i(g_object_id_uniform, PLASTER_WALL);
       DrawVirtualObject("the_plane");
 
+      // VENTILADOR
+      model = Matrix_Translate(-6.5f, 3.0f, -4.615f) 
+            * Matrix_Rotate((float)glfwGetTime() * 2, glm::vec4(0.0f, 1.0f, 0.0f, 0.0f))
+            * Matrix_Scale(0.5f, 0.5f, 0.5f);
+      glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+      glUniform1i(g_object_id_uniform, CEILING_FAN);
+      DrawVirtualObject("ceiling_fan");
+      DrawVirtualObject("ceiling_fan_blades");
+
+      // ESTATUA DA GATO
+      model = Matrix_Translate(-7.5f, 0.02f, -4.615f)
+      * Matrix_Rotate(PI / 2.0f, glm::vec4(0.0f, 1.0f, 0.0f, 0.0f))
+      * Matrix_Scale(1.0f, 1.0f, 1.0f);
+      glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+      glUniform1i(g_object_id_uniform, CAT_STATUE);
+      DrawVirtualObject("concrete_cat_statue");
+
+      //PATO AMASSADO
+        model = Matrix_Translate(-7.5f, 0.0f, -4.615f)
+        * Matrix_Rotate(PI / 2.0f, glm::vec4(0.0f, 1.0f, 0.0f, 0.0f))
+        * Matrix_Scale(3.3f, 0.1f, 3.3f);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, RUBBER_DUCK);
+        DrawVirtualObject("rubber_duck_toy"); 
       
        /*============================================================================================
         OBJETOS nao usados
         =============================================================================================
-
-        // VENTILADOR
-        model = Matrix_Rotate(seconds * 2, glm::vec4(0.0f, 1.0f, 0.0f, 0.0f))
-        * Matrix_Translate(0.0f,3.0f,0.0f);
-        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(g_object_id_uniform, CEILING_FAN);
-        DrawVirtualObject("ceiling_fan");
-        DrawVirtualObject("ceiling_fan_blades");
-        
-       // ESTATUA DA GATO
-       model = Matrix_Translate(1.0f,-0.5f,0.0f)
-       * Matrix_Scale(1.0f, 1.0f, 1.0f);
-       glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-       glUniform1i(g_object_id_uniform, CAT_STATUE);
-       DrawVirtualObject("concrete_cat_statue");
        
        //ESPELHO
        model = Matrix_Translate(1.0f,-0.5f,1.1f)

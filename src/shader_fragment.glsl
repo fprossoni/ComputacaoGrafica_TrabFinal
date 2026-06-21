@@ -206,8 +206,8 @@ void main()
 
     else if ( object_id == PLASTER_WALL )
     {
-        float U = texcoords.x;
-        float V = texcoords.y; 
+        float U = texcoords.x / 2.5;
+        float V = texcoords.y / 2.5; 
 
 		// Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
 		Kd0 = texture(TextureImage23, vec2(U,V)).rgb;
