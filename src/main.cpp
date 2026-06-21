@@ -305,7 +305,7 @@ int main(int argc, char* argv[])
         InteractiveObject duck;
         duck.scene_name = "rubber_duck_toy";
         duck.object_id = RUBBER_DUCK;
-        duck.position = glm::vec3(-1.5f, 0.0f, -1.0f);
+        duck.position = glm::vec3(-2.2f,0.0f,1.3f);
         duck.scale = glm::vec3(1.0f, 1.0f, 1.0f);
         duck.scale_when_picked = duck.scale;
         {
@@ -327,6 +327,123 @@ int main(int argc, char* argv[])
         duck.velocity = glm::vec3(0.0f);
 
         g_InteractiveObjects.push_back(duck);
+
+    {
+        InteractiveObject f;
+        f.scene_name = "Text_F_.001_Text.050";
+        f.object_id = WOOD_CUBE;
+        f.position = glm::vec3(-3.75f, 1.21f, -4.2f);
+        f.scale = glm::vec3(4.0f, 4.0f, 4.0f);
+        f.scale_when_picked = f.scale;
+        auto it = g_VirtualScene.find("Text_F_.001_Text.050");
+        if (it != g_VirtualScene.end()) {
+            const auto& bmin = it->second.bbox_min;
+            const auto& bmax = it->second.bbox_max;
+            f.base_neg_offset = glm::vec3(
+                std::max(0.0f, -bmin.x),
+                std::max(0.0f, -bmin.y),
+                std::max(0.0f, -bmin.z));
+            f.base_pos_offset = glm::vec3(
+                std::max(0.0f,  bmax.x),
+                std::max(0.0f,  bmax.y),
+                std::max(0.0f,  bmax.z));
+        }
+        f.velocity = glm::vec3(0.0f);
+        g_InteractiveObjects.push_back(f);
+    }
+
+    /*============================================================================================
+        COLIDIVEIS ESTATICOS
+    ============================================================================================*/
+
+    auto add_collidable = [](const char* name, const glm::mat4& model)
+    {
+        auto it = g_VirtualScene.find(name);
+        if (it == g_VirtualScene.end()) return;
+        g_StaticCollidables.push_back(
+            ComputeWorldAABB(it->second.bbox_min, it->second.bbox_max, model));
+    };
+
+    {
+        glm::mat4 M;
+        M = Matrix_Translate(4.0f,0.0f,4.5f)
+          * Matrix_Scale(0.35f, 0.35f, 0.35f)
+          * Matrix_Rotate(PI/2, glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
+        add_collidable("wooden_table_02", M);
+
+        float dist = 0.3f;
+        float start_yneg = -4.8f;
+        for (int laco = 0; laco < 10; ++laco) {
+            M = Matrix_Translate(4.8f,0.0f,start_yneg)
+              * Matrix_Scale(0.4f, 0.4f, 0.4f)
+              * Matrix_Rotate(-PI/2, glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
+            add_collidable("SchoolChair_01", M);
+            start_yneg += dist;
+        }
+
+        float start_xpos = -4.8f;
+        for (int laco = 0; laco < 10; ++laco) {
+            M = Matrix_Translate(start_xpos,0.0f,4.8f)
+              * Matrix_Scale(0.4f, 0.4f, 0.4f)
+              * Matrix_Rotate(PI, glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
+            add_collidable("SchoolChair_01", M);
+            start_xpos += dist;
+        }
+
+        // Barril de metal
+        M = Matrix_Translate(2.6f,0.0f,-3.2f) 
+        * Matrix_Scale(0.42f,0.42f,0.42f);
+        add_collidable("barrel_03", M);
+        M = Matrix_Translate(3.0f,0.0f,-3.2f) 
+        * Matrix_Scale(0.42f,0.42f,0.42f) 
+        * Matrix_Rotate(PI/3, glm::vec4(0.0f,1.0f,0.0f,0.0f));
+        add_collidable("barrel_03", M);
+        M = Matrix_Translate(2.7f,0.0f,-2.9f) 
+        * Matrix_Scale(0.42f,0.42f,0.42f) 
+        * Matrix_Rotate(PI/3.5, glm::vec4(0.0f,1.0f,0.0f,0.0f));
+        add_collidable("barrel_03", M);
+        M = Matrix_Translate(3.0f,0.0f,-2.9f) 
+        * Matrix_Scale(0.42f,0.42f,0.42f) 
+        * Matrix_Rotate(PI/0.5, glm::vec4(0.0f,1.0f,0.0f,0.0f));
+        add_collidable("barrel_03", M);
+        M = Matrix_Translate(2.9f,0.0f,-2.6f) 
+        * Matrix_Scale(0.42f,0.42f,0.42f) 
+        * Matrix_Rotate(PI/6.7, glm::vec4(0.0f,1.0f,0.0f,0.0f));
+        add_collidable("barrel_03", M);
+        M = Matrix_Translate(2.8f,0.0f,-3.5f) 
+        * Matrix_Scale(0.42f,0.42f,0.42f) 
+        * Matrix_Rotate(PI/0.12, glm::vec4(0.0f,1.0f,0.0f,0.0f));
+        add_collidable("barrel_03", M);
+
+        // Placa chao molhado
+        M = Matrix_Translate(2.3f,0.0f,-2.9f) 
+        * Matrix_Scale(0.5f,0.5f,0.5f) 
+        * Matrix_Rotate(-PI/4, glm::vec4(0.0f,1.0f,0.0f,0.0f));
+        add_collidable("WetFloorSign_01", M);
+
+        // Cubos abc
+        M = Matrix_Translate(-2.12f,0.243f,2.55f) 
+        * Matrix_Rotate(0.2f,glm::vec4(0.0f,1.0f,0.0f,0.0f)) 
+        * Matrix_Scale(1.0f,1.0f,1.0f);
+        add_collidable("Text_A_.001_Cube.005", M);
+        M = Matrix_Translate(-2.1f,0.0f,2.7f) 
+        * Matrix_Rotate(0.2f,glm::vec4(0.0f,1.0f,0.0f,0.0f)) 
+        * Matrix_Scale(1.0f,1.0f,1.0f);
+        add_collidable("Text_B_.001_Text.046", M);
+        M = Matrix_Translate(-2.13f,0.0f,2.4f) 
+        * Matrix_Rotate(0.2f,glm::vec4(0.0f,1.0f,0.0f,0.0f)) 
+        * Matrix_Scale(1.0f,1.0f,1.0f);
+        add_collidable("Text_C_.001_Text.047", M);
+
+        // Cubos cg
+        M = Matrix_Translate(-3.6f,0.0f,-4.2f) 
+        * Matrix_Scale(5.0f,5.0f,5.0f);
+        add_collidable("Text_C_.001_Text.047", M);
+        M = Matrix_Translate(-3.2f,0.0f,-4.6f) 
+        * Matrix_Scale(1.0f,1.0f,1.0f) 
+        * Matrix_Rotate(-PI/4,glm::vec4(0.0f,1.0f,0.0f,0.0f));
+        add_collidable("Text_G_.001_Text.051", M);
+    }
 
     if ( argc > 1 )
     {
@@ -526,13 +643,6 @@ int main(int argc, char* argv[])
         OBJETOS DO CANTO DE SAIDA
         ============================================================================================*/
         
-        //CUBO F
-        model = Matrix_Translate(-3.75f,1.21f,-4.2f)
-        * Matrix_Scale(4.0f, 4.0f,4.0f);
-        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(g_object_id_uniform, WOOD_CUBE);
-        DrawVirtualObject("Text_F_.001_Text.050"); // CUBO COM LETRA F (procurar no obj diferentes se precisar)
-        
         //CUBO C
         model = Matrix_Translate(-3.6f,0.0f,-4.2f)
         * Matrix_Scale(5.0f, 5.0f,5.0f);
@@ -710,12 +820,14 @@ int main(int argc, char* argv[])
         DrawVirtualObject("Text_C_.001_Text.047");
     
         //PATO DE BORRACHA
+        /*
         model = Matrix_Translate(-2.2f,0.0f,1.3f)
             * Matrix_Rotate(0.3f, glm::vec4(0.0f, 1.0f, 0.0f, 0.0f))
             * Matrix_Scale(1.0f, 1.0f,1.0f);
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, RUBBER_DUCK);
         DrawVirtualObject("rubber_duck_toy");
+        */
 
        
        /*============================================================================================
