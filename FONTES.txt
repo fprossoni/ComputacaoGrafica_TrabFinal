@@ -6,6 +6,7 @@ https://polyhaven.com/a/box_profile_metal_sheet
 https://texturelabs.org/textures/metal_214/
 https://www.poliigon.com/texture/matte-metal-texture-black/7037
 https://polyhaven.com/a/plastered_wall_05
+https://polyhaven.com/a/painted_plaster_wall
 
 OBJETOS
 https://polyhaven.com/a/chess_set
