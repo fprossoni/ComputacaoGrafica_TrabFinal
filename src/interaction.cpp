@@ -285,6 +285,45 @@ void HandleInteraction(glm::vec3 cPos, glm::vec3 vDir)
                 }
             }
         }
+
+        for (const auto& s : g_StaticCollidables)
+        {
+            float p_min_x = proposed.x - neg.x;
+            float p_max_x = proposed.x + pos_ext.x;
+            float p_min_y = proposed.y - neg.y;
+            float p_max_y = proposed.y + pos_ext.y;
+            float p_min_z = proposed.z - neg.z;
+            float p_max_z = proposed.z + pos_ext.z;
+
+            float ox = std::min(p_max_x, s.max.x) - std::max(p_min_x, s.min.x);
+            float oy = std::min(p_max_y, s.max.y) - std::max(p_min_y, s.min.y);
+            float oz = std::min(p_max_z, s.max.z) - std::max(p_min_z, s.min.z);
+
+            if (ox > 0.0f && oy > 0.0f && oz > 0.0f)
+            {
+                if (ox <= oy && ox <= oz)
+                {
+                    if (proposed.x < s.min.x)
+                        proposed.x = s.min.x - pos_ext.x - 0.001f;
+                    else
+                        proposed.x = s.max.x + neg.x + 0.001f;
+                }
+                else if (oy <= ox && oy <= oz)
+                {
+                    if (proposed.y < s.min.y)
+                        proposed.y = s.min.y - pos_ext.y - 0.001f;
+                    else
+                        proposed.y = s.max.y + neg.y + 0.001f;
+                }
+                else
+                {
+                    if (proposed.z < s.min.z)
+                        proposed.z = s.min.z - pos_ext.z - 0.001f;
+                    else
+                        proposed.z = s.max.z + neg.z + 0.001f;
+                }
+            }
+        }
         obj.position = proposed;
         obj.velocity = glm::vec3(0.0f);
     }
