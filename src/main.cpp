@@ -826,7 +826,7 @@ int main(int argc, char* argv[])
         glUniform1i(g_object_id_uniform, WOOD_CUBE);
         DrawVirtualObject("Text_C_.001_Text.047");
 
-        //BANANAS (movimento senoidal para +x, tecendo em z)
+        //BANANAS (curva de bezier)
         {
             float speed = 0.6f;
             float x_start = -4.7f;
