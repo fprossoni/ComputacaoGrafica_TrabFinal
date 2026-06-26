@@ -24,8 +24,6 @@ extern int g_HeldObjectIndex;
 extern float g_PickDistance;
 extern bool g_LeftMouseButtonPressed;
 
-float RaycastSceneDistance(glm::vec3 ray_origin, glm::vec3 ray_direction, glm::vec3* out_normal = nullptr);
-
 void HandleInteraction(glm::vec3 cPos, glm::vec3 vDir);
 
 void UpdateInteractiveObjects(float deltaTime);

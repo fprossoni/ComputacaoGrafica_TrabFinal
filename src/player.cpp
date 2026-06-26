@@ -1,9 +1,8 @@
 #include "player.h"
 
-#include <algorithm>
-#include <cmath>
 #include <glm/glm.hpp>
 
+#include "collisions.h"
 #include "scene.h"
 #include "interaction.h"
 
@@ -27,101 +26,6 @@ bool g_SPACE_Pressed = false;
 bool g_SHIFT_Pressed = false;
 
 float g_VerticalVelocity = 0.0f;
-
-static const float WALL_MAIN_ZMIN = -0.5f;
-static const float WALL_MAIN_ZMAX =  0.885f;
-static const float WALL_MAIN_YMIN =  0.0f;
-static const float WALL_MAIN_YMAX =  3.0f;
-
-static bool InDoorOpening(float player_z, float player_feet_y, float player_head_y)
-{
-    if (!(player_z >= DOOR_Z_CENTER - DOOR_Z_HALF
-       && player_z <= DOOR_Z_CENTER + DOOR_Z_HALF))
-        return false;
-
-    return player_feet_y >= DOOR_Y_BOTTOM && player_head_y <= DOOR_Y_TOP;
-}
-
-static bool HitsWall(float player_z, float player_feet_y, float player_head_y, float r)
-{
-    float pz_min = player_z - r;
-    float pz_max = player_z + r;
-
-    if (pz_max > WALL_MAIN_ZMIN && pz_min < WALL_MAIN_ZMAX)
-    {
-        if (player_head_y > WALL_MAIN_YMIN && player_feet_y < WALL_MAIN_YMAX)
-            return true;
-    }
-
-    if (InDoorOpening(player_z, player_feet_y, player_head_y))
-        return false;
-
-    return true;
-}
-
-static bool IsOnSurface(float feet_y, float px, float pz, float r)
-{
-    if (feet_y <= 0.001f) return true;
-    for (const auto& s : g_StaticCollidables)
-    {
-        if (std::abs(feet_y - s.max.y) < 0.01f)
-        {
-            float px_min = px - r, px_max = px + r;
-            float pz_min = pz - r, pz_max = pz + r;
-            if (px_max > s.min.x && px_min < s.max.x
-             && pz_max > s.min.z && pz_min < s.max.z)
-                return true;
-        }
-    }
-    for (size_t i = 0; i < g_InteractiveObjects.size(); ++i)
-    {
-        if (g_IsHoldingObject && (int)i == g_HeldObjectIndex) continue;
-        const InteractiveObject& obj = g_InteractiveObjects[i];
-        glm::vec3 obj_min = obj.position - obj.base_neg_offset * obj.scale;
-        glm::vec3 obj_max = obj.position + obj.base_pos_offset * obj.scale;
-        if (std::abs(feet_y - obj_max.y) < 0.01f)
-        {
-            float px_min = px - r, px_max = px + r;
-            float pz_min = pz - r, pz_max = pz + r;
-            if (px_max > obj_min.x && px_min < obj_max.x
-             && pz_max > obj_min.z && pz_min < obj_max.z)
-                return true;
-        }
-    }
-    return false;
-}
-
-static bool StandingOnThisObject(float feet_y, float px, float pz, float r,
-                                 const glm::vec3& obj_min, const glm::vec3& obj_max)
-{
-    if (std::abs(feet_y - obj_max.y) > 0.01f) return false;
-    float px_min = px - r, px_max = px + r;
-    float pz_min = pz - r, pz_max = pz + r;
-    return px_max > obj_min.x && px_min < obj_max.x
-        && pz_max > obj_min.z && pz_min < obj_max.z;
-}
-
-static void PushHorizontally(float& new_x, float& new_z, float r,
-                              const glm::vec3& obj_min, const glm::vec3& obj_max,
-                              float player_min_y, float player_max_y)
-{
-    float ox = std::min(new_x + r, obj_max.x) - std::max(new_x - r, obj_min.x);
-    float oz = std::min(new_z + r, obj_max.z) - std::max(new_z - r, obj_min.z);
-
-    float oy = std::min(player_max_y, obj_max.y) - std::max(player_min_y, obj_min.y);
-    if (ox <= 0.0f || oz <= 0.0f || oy <= 0.0f) return;
-
-    if (ox < oz)
-    {
-        if (new_x < obj_min.x) new_x = obj_min.x - r - 0.001f;
-        else                   new_x = obj_max.x + r + 0.001f;
-    }
-    else
-    {
-        if (new_z < obj_min.z) new_z = obj_min.z - r - 0.001f;
-        else                   new_z = obj_max.z + r + 0.001f;
-    }
-}
 
 void UpdatePlayerPosition(glm::vec4 view_vector, glm::vec4 up, float deltaTime)
 {

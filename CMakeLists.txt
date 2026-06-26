@@ -9,6 +9,7 @@ set(SOURCES
   src/main.cpp
   src/player.cpp
   src/interaction.cpp
+  src/collisions.cpp
   src/scene.cpp
   src/correcao.cpp
   src/textrendering.cpp
