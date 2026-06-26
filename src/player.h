@@ -4,7 +4,7 @@
 #include <glm/vec4.hpp>
 
 #define SPEED 2.1f
-#define WALK_SPEED 50
+#define WALK_SPEED 2
 
 #define PLAYER_RADIUS 0.3f
 #define PLAYER_HEIGHT 0.6f
