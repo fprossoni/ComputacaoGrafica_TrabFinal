@@ -1704,7 +1704,7 @@ void TextRendering_ShowEulerAngles(GLFWwindow* window, float lookX, float lookY,
     char buffer[100];
 
     snprintf(buffer, sizeof(buffer), "GLiminal 1.0 - Player Pos: X = %.2f | Y = %.2f | Z = %.2f\n", g_CameraPos.x, g_CameraPos.y, g_CameraPos.z);
-    TextRendering_PrintString(window, buffer, -1.0f + pad/10, -1.0f + 20*pad/10, 1.0f);
+    TextRendering_PrintString(window, buffer, -1.0f + pad/10, -1.0f + 2*pad/10, 1.0f);
 
     /*
     snprintf(buffer, sizeof(buffer), "Camera View - X = %.2f | Y = %.2f | Z = %.2f\n", lookX, lookY, lookZ);
@@ -1724,9 +1724,9 @@ void TextRendering_ShowProjection(GLFWwindow* window)
     float lineheight = TextRendering_LineHeight(window);
     float charwidth = TextRendering_CharWidth(window);
 
-    if ( g_UsePerspectiveProjection )
+    if ( false )
         TextRendering_PrintString(window, "Perspective", 1.0f-13*charwidth, -1.0f+2*lineheight/10, 1.0f);
-    else
+    else if ( false )
         TextRendering_PrintString(window, "Orthographic", 1.0f-13*charwidth, -1.0f+2*lineheight/10, 1.0f);
 }
 
