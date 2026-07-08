@@ -826,15 +826,20 @@ int main(int argc, char* argv[])
         glUniform1i(g_object_id_uniform, WOOD_CUBE);
         DrawVirtualObject("Text_C_.001_Text.047");
 
-        //BANANAS (curva de bezier)
+        //BANANAS (curva de Bézier cúbica)
         {
-            float speed = 0.6f;
-            float x_start = -4.7f;
-            float x_range = 4.7f;
-            float x = x_start + fmod((float)glfwGetTime() * speed, x_range);
-            float z = 4.09f + 0.27f * sin(x * 4.0f);
-            float y = 0.05f;
-            model = Matrix_Translate(x, y, z)
+            auto cubic_bezier = [](glm::vec3 p0, glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, float t) -> glm::vec3
+            {
+                float u = 1.0f - t;
+                return u*u*u * p0 + 3.0f*u*u*t * p1 + 3.0f*u*t*t * p2 + t*t*t * p3;
+            };
+            glm::vec3 p0(-4.5f, 0.05f, 3.5f);
+            glm::vec3 p1(-1.05f, 0.8f, 2.04f);
+            glm::vec3 p2(2.44f, 1.67f,  2.46f);
+            glm::vec3 p3(4.76f,2.55f,3.2f);
+            float t = fmod((float)glfwGetTime() * 0.12f, 1.0f);
+            glm::vec3 pos = cubic_bezier(p0, p1, p2, p3, t);
+            model = Matrix_Translate(pos.x, pos.y, pos.z)
                 * Matrix_Scale(1.0f, 1.0f, 1.0f);
             glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
             glUniform1i(g_object_id_uniform, BANANAS);
