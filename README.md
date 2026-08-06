@@ -31,3 +31,6 @@ Compilação padrão do projeto com `cmake --workflow --preset configure-build-r
 ![alt text](GLiminal_image5.png)
 ![alt text](GLiminal_image6.png)
 ![alt text](GLiminal_image7.png)
+
+## Link para demonstração em vídeo
+https://www.youtube.com/watch?v=LW8fwMzFa50
